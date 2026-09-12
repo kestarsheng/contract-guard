@@ -2,6 +2,8 @@
 
 **Deterministic API breaking-change detector for AI agents.**
 
+English | [中文](README_ZH.md)
+
 Contract Guard gives any AI agent the ability to judge whether an API change is safe or breaking — without guessing. It compares two versions of an OpenAPI, GraphQL, or JSON Schema contract and returns structured, reproducible findings in milliseconds. The core diff engine is 100% deterministic and works offline; an optional LLM advisory layer can append consumer-impact context when a key is configured.
 
 > **Why not just ask the LLM?** LLMs hallucinate schema diffs, miss nested constraint tightenings, and can't guarantee the same answer twice. Contract Guard's rule engine is built for the exact job: every input pair produces the same finding set, every time.
@@ -26,7 +28,7 @@ curl -X POST https://contract-guard-eta.vercel.app/v1/diff \
 
 **MCP endpoint:** `https://contract-guard-eta.vercel.app/mcp`
 
-Add it to any MCP-compatible agent (Claude, Cursor, …) and the agent gains three tools: `check_breaking_changes`, `list_supported_formats`, `explain_change_type`.
+Add it to any MCP-compatible agent (Claude, Cursor, …) and the agent gains six tools: `check_breaking_changes`, `list_supported_formats`, `explain_change_type`, `suggest_version_bump`, `generate_changelog`, `suggest_migration`.
 
 ---
 
@@ -46,6 +48,8 @@ Add it to any MCP-compatible agent (Claude, Cursor, …) and the agent gains thr
 | Enum value removed | critical | yes |
 | Constraint tightened (min/max/pattern) | major | yes |
 | Required field added | critical | yes |
+| Content-Type removed/changed | critical | yes |
+| Field/endpoint deprecated | info | no |
 | New endpoint / field added | info | no |
 
 ### GraphQL SDL
@@ -58,6 +62,8 @@ Add it to any MCP-compatible agent (Claude, Cursor, …) and the agent gains thr
 | Argument removed / required arg added | critical | yes |
 | Input field removed / required input field added | critical | yes |
 | Union member removed | critical | yes |
+| Directive removed | major | yes |
+| `@deprecated` added | info | no |
 
 ### JSON Schema
 
@@ -69,6 +75,9 @@ Add it to any MCP-compatible agent (Claude, Cursor, …) and the agent gains thr
 | Enum value removed | critical | yes |
 | Constraint tightened | major | yes |
 | `additionalProperties` restricted | major | yes |
+| `prefixItems` (tuple) changed | critical | yes |
+| `dependentRequired` added | major | yes |
+| `unevaluatedProperties` restricted | major | yes |
 
 ---
 
@@ -141,6 +150,19 @@ Lists supported contract formats.
 | `check_breaking_changes(old_spec, new_spec, format, use_llm)` | Core diff — returns full finding report as JSON string |
 | `list_supported_formats()` | Instant, free — lists accepted formats |
 | `explain_change_type(change_type)` | Instant, free — explains what a change_type means |
+| `suggest_version_bump(old_spec, new_spec, format, current_version)` | Suggests SemVer bump level (major/minor/patch) |
+| `generate_changelog(old_spec, new_spec, format, old_version, new_version)` | Generates markdown changelog for release notes |
+| `suggest_migration(old_spec, new_spec, format)` | Generates compatibility migration suggestions for breaking changes |
+
+### Additional endpoints
+
+| Endpoint | Description |
+|---|---|
+| `POST /v1/chain-diff` | Multi-version chain analysis (v1→v2→...→vN) |
+| `POST /v1/semver` | Suggest SemVer bump from a diff result |
+| `POST /v1/migration` | Generate migration suggestions for breaking changes |
+| `POST /v1/sarif` | Export diff results as SARIF 2.1.0 for GitHub Code Scanning |
+| `POST /v1/changelog` | Generate markdown changelog |
 
 ---
 
@@ -206,7 +228,7 @@ Open <http://localhost:8000> for the demo page, <http://localhost:8000/docs> for
 pytest -v
 ```
 
-33 tests covering all three engines and the orchestration layer.
+46 tests covering all three engines, orchestration, semver, migration, SARIF, and chain diff.
 
 ---
 

@@ -2,6 +2,8 @@
 
 **面向 AI Agent 的确定性 API 破坏性变更检测器。**
 
+[English](README.md) | 中文
+
 Contract Guard 赋予任何 AI Agent 判断 API 变更是否安全的能力——无需猜测。它对比两个版本的 OpenAPI、GraphQL 或 JSON Schema 契约，在毫秒级返回结构化、可复现的检测结果。核心 diff 引擎 100% 确定性，可离线运行；可选的 LLM 咨询层在配置密钥后追加消费者影响评估。
 
 > **为什么不直接问 LLM？** LLM 会幻觉 schema diff、漏掉嵌套约束收紧、无法保证两次回答一致。Contract Guard 的规则引擎专为这项工作而生：相同的输入永远产生相同的检测结果。
@@ -26,7 +28,7 @@ curl -X POST https://contract-guard-eta.vercel.app/v1/diff \
 
 **MCP 端点：** `https://contract-guard-eta.vercel.app/mcp`
 
-添加到任何 MCP 兼容的 Agent（Claude、Cursor 等），Agent 即获得三个工具：`check_breaking_changes`、`list_supported_formats`、`explain_change_type`。
+添加到任何 MCP 兼容的 Agent（Claude、Cursor 等），Agent 即获得六个工具：`check_breaking_changes`、`list_supported_formats`、`explain_change_type`、`suggest_version_bump`、`generate_changelog`、`suggest_migration`。
 
 ---
 
@@ -46,6 +48,8 @@ curl -X POST https://contract-guard-eta.vercel.app/v1/diff \
 | 枚举值移除 | critical | 是 |
 | 约束收紧（min/max/pattern） | major | 是 |
 | 新增必填字段 | critical | 是 |
+| Content-Type 移除/变更 | critical | 是 |
+| 字段/端点标记废弃 | info | 否 |
 | 新增端点 / 字段 | info | 否 |
 
 ### GraphQL SDL
@@ -58,6 +62,8 @@ curl -X POST https://contract-guard-eta.vercel.app/v1/diff \
 | 参数移除 / 新增必填参数 | critical | 是 |
 | Input 字段移除 / 新增必填 Input 字段 | critical | 是 |
 | Union 成员移除 | critical | 是 |
+| Directive 移除 | major | 是 |
+| 新增 `@deprecated` | info | 否 |
 
 ### JSON Schema
 
@@ -69,6 +75,9 @@ curl -X POST https://contract-guard-eta.vercel.app/v1/diff \
 | 枚举值移除 | critical | 是 |
 | 约束收紧 | major | 是 |
 | `additionalProperties` 收紧 | major | 是 |
+| `prefixItems`（元组）变更 | critical | 是 |
+| 新增 `dependentRequired` | major | 是 |
+| `unevaluatedProperties` 收紧 | major | 是 |
 
 ---
 
@@ -138,6 +147,19 @@ curl -X POST https://contract-guard-eta.vercel.app/v1/diff \
 | `check_breaking_changes(old_spec, new_spec, format, use_llm)` | 核心 diff — 返回完整检测报告 JSON |
 | `list_supported_formats()` | 即时、免费 — 列出支持的格式 |
 | `explain_change_type(change_type)` | 即时、免费 — 解释 change_type 的含义 |
+| `suggest_version_bump(old_spec, new_spec, format, current_version)` | 推导 SemVer 版本 bump（major/minor/patch） |
+| `generate_changelog(old_spec, new_spec, format, old_version, new_version)` | 生成 markdown changelog |
+| `suggest_migration(old_spec, new_spec, format)` | 为破坏性变更生成兼容性迁移建议 |
+
+### 额外端点
+
+| 端点 | 说明 |
+|---|---|
+| `POST /v1/chain-diff` | 多版本链式分析（v1→v2→...→vN） |
+| `POST /v1/semver` | 推导 SemVer 版本 bump |
+| `POST /v1/migration` | 生成迁移建议 |
+| `POST /v1/sarif` | 导出 SARIF 2.1.0 格式（GitHub Code Scanning） |
+| `POST /v1/changelog` | 生成 markdown changelog |
 
 ---
 
@@ -203,7 +225,7 @@ uvicorn app.main:app --reload --port 8000
 pytest -v
 ```
 
-33 个测试，覆盖三个引擎和编排层。
+46 个测试，覆盖三个引擎、新增模块（semver/migration/sarif）和编排层。
 
 ---
 
