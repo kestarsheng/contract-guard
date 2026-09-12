@@ -4,7 +4,7 @@ from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-PROJECT_SLUG = "contract-guard"
+PROJECT_SLUG = "kestarsheng-contract-guard"
 PROJECT_NAME = "Contract Guard"
 PROJECT_VERSION = "1.0.0"
 
