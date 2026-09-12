@@ -105,7 +105,11 @@ def _walk(old_s, new_s, loc, old_root, new_root, out, seen) -> None:
     _diff_required(old_s, new_s, loc, out)
     _diff_properties(old_s, new_s, loc, old_root, new_root, out, seen)
     _diff_items(old_s, new_s, loc, old_root, new_root, out, seen)
+    _diff_prefix_items(old_s, new_s, loc, out)
+    _diff_contains(old_s, new_s, loc, out)
+    _diff_dependent_required(old_s, new_s, loc, out)
     _diff_constraints(old_s, new_s, loc, out)
+    _diff_unevaluated(old_s, new_s, loc, out)
 
 
 def _diff_type(old_s: dict, new_s: dict, loc: str, out: list) -> None:
@@ -276,6 +280,109 @@ def _diff_constraints(old_s: dict, new_s: dict, loc: str, out: list) -> None:
         out.append(make_finding(
             "constraint_tightened", True, "major", loc,
             "additionalProperties changed to forbidden",
+            previous="true/default", current="false",
+            fmt=FORMAT_JSON_SCHEMA,
+        ))
+
+
+def _diff_prefix_items(old_s: dict, new_s: dict, loc: str, out: list) -> None:
+    old_pi = old_s.get("prefixItems")
+    new_pi = new_s.get("prefixItems")
+    if not isinstance(old_pi, list) and not isinstance(new_pi, list):
+        return
+    old_len = len(old_pi) if isinstance(old_pi, list) else 0
+    new_len = len(new_pi) if isinstance(new_pi, list) else 0
+    if old_len > new_len and new_len >= 0:
+        out.append(make_finding(
+            "prefix_items_removed", True, "critical", loc,
+            f"prefixItems shortened from {old_len} to {new_len} entries",
+            previous=old_len, current=new_len,
+            suggestion="Removing prefix items changes tuple semantics",
+            fmt=FORMAT_JSON_SCHEMA,
+        ))
+    for i in range(min(old_len, new_len)):
+        old_item = old_pi[i] if isinstance(old_pi, list) and i < len(old_pi) else None
+        new_item = new_pi[i] if isinstance(new_pi, list) and i < len(new_pi) else None
+        if isinstance(old_item, dict) and isinstance(new_item, dict):
+            old_t = old_item.get("type")
+            new_t = new_item.get("type")
+            if old_t and new_t and old_t != new_t:
+                out.append(make_finding(
+                    "prefix_item_type_changed", True, "critical", f"{loc}.prefixItems[{i}]",
+                    f"prefixItems[{i}] type changed from {render(old_t)} to {render(new_t)}",
+                    previous=old_t, current=new_t,
+                    fmt=FORMAT_JSON_SCHEMA,
+                ))
+
+
+def _diff_contains(old_s: dict, new_s: dict, loc: str, out: list) -> None:
+    old_has = "contains" in old_s
+    new_has = "contains" in new_s
+    if not old_has and not new_has:
+        return
+    if old_has and not new_has:
+        out.append(make_finding(
+            "contains_removed", True, "major", loc,
+            "contains constraint was removed",
+            suggestion="Removing contains allows arrays that previously failed validation",
+            fmt=FORMAT_JSON_SCHEMA,
+        ))
+    old_mc = old_s.get("minContains")
+    new_mc = new_s.get("minContains")
+    if isinstance(old_mc, (int, float)) and isinstance(new_mc, (int, float)) and new_mc > old_mc:
+        out.append(make_finding(
+            "constraint_tightened", True, "major", loc,
+            f"minContains raised from {old_mc} to {new_mc}",
+            previous=old_mc, current=new_mc,
+            fmt=FORMAT_JSON_SCHEMA,
+        ))
+    old_xc = old_s.get("maxContains")
+    new_xc = new_s.get("maxContains")
+    if isinstance(old_xc, (int, float)) and isinstance(new_xc, (int, float)) and new_xc < old_xc:
+        out.append(make_finding(
+            "constraint_tightened", True, "major", loc,
+            f"maxContains lowered from {old_xc} to {new_xc}",
+            previous=old_xc, current=new_xc,
+            fmt=FORMAT_JSON_SCHEMA,
+        ))
+
+
+def _diff_dependent_required(old_s: dict, new_s: dict, loc: str, out: list) -> None:
+    old_dr = old_s.get("dependentRequired") or {}
+    new_dr = new_s.get("dependentRequired") or {}
+    if not isinstance(old_dr, dict) or not isinstance(new_dr, dict):
+        return
+    for prop, old_deps in old_dr.items():
+        new_deps = new_dr.get(prop)
+        if new_deps is None:
+            continue
+        old_set = set(old_deps) if isinstance(old_deps, list) else set()
+        new_set = set(new_deps) if isinstance(new_deps, list) else set()
+        added = new_set - old_set
+        for dep in sorted(added):
+            out.append(make_finding(
+                "dependent_required_added", True, "major", loc,
+                f"dependentRequired: {prop} now requires {dep}",
+                previous=None, current=f"{prop} -> {dep}",
+                suggestion="Adding a dependent requirement breaks payloads that omit the dependency",
+                fmt=FORMAT_JSON_SCHEMA,
+            ))
+
+
+def _diff_unevaluated(old_s: dict, new_s: dict, loc: str, out: list) -> None:
+    if old_s.get("unevaluatedProperties") is not False \
+            and new_s.get("unevaluatedProperties") is False:
+        out.append(make_finding(
+            "constraint_tightened", True, "major", loc,
+            "unevaluatedProperties changed to forbidden",
+            previous="true/default", current="false",
+            fmt=FORMAT_JSON_SCHEMA,
+        ))
+    if old_s.get("unevaluatedItems") is not False \
+            and new_s.get("unevaluatedItems") is False:
+        out.append(make_finding(
+            "constraint_tightened", True, "major", loc,
+            "unevaluatedItems changed to forbidden",
             previous="true/default", current="false",
             fmt=FORMAT_JSON_SCHEMA,
         ))

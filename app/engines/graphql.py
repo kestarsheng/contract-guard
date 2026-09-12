@@ -69,6 +69,8 @@ def diff_graphql(old_schema: GraphQLSchema, new_schema: GraphQLSchema) -> list:
     old_types = _named_types(old_schema)
     new_types = _named_types(new_schema)
 
+    _diff_directives(old_schema, new_schema, findings)
+
     for name, old_t in old_types.items():
         new_t = new_types.get(name)
         if new_t is None:
@@ -88,6 +90,28 @@ def diff_graphql(old_schema: GraphQLSchema, new_schema: GraphQLSchema) -> list:
                 fmt=FORMAT_GRAPHQL,
             ))
     return findings
+
+
+def _diff_directives(old_schema: GraphQLSchema, new_schema: GraphQLSchema, out: list) -> None:
+    old_dirs = {d.name: d for d in (old_schema.directives or [])
+                if not d.name.startswith("__")}
+    new_dirs = {d.name: d for d in (new_schema.directives or [])
+                if not d.name.startswith("__")}
+    for name in old_dirs:
+        if name not in new_dirs:
+            out.append(make_finding(
+                "directive_removed", True, "major", f"directive @{name}",
+                f"Directive @{name} was removed",
+                suggestion="Removing a directive breaks schemas that apply it",
+                fmt=FORMAT_GRAPHQL,
+            ))
+    for name in new_dirs:
+        if name not in old_dirs:
+            out.append(make_finding(
+                "directive_added", False, "info", f"directive @{name}",
+                f"Directive @{name} was added",
+                fmt=FORMAT_GRAPHQL,
+            ))
 
 
 def _is_same_kind(a, b) -> bool:
@@ -142,6 +166,7 @@ def _diff_fields(name: str, old_fields, new_fields, out: list) -> None:
                 fmt=FORMAT_GRAPHQL,
             ))
             continue
+        _diff_field_deprecated(name, fname, old_f, new_f, out)
         _diff_field_type(name, fname, old_f, new_f, out)
         _diff_args(name, fname, old_f.args, new_f.args, out)
 
@@ -152,6 +177,24 @@ def _diff_fields(name: str, old_fields, new_fields, out: list) -> None:
                 f"Field {name}.{fname} was added",
                 fmt=FORMAT_GRAPHQL,
             ))
+
+
+def _diff_field_deprecated(name: str, fname: str, old_f: GraphQLField, new_f: GraphQLField, out: list) -> None:
+    old_dep = getattr(old_f, "is_deprecated", False)
+    new_dep = getattr(new_f, "is_deprecated", False)
+    if not old_dep and new_dep:
+        out.append(make_finding(
+            "field_deprecated", False, "minor", f"{name}.{fname}",
+            f"Field {name}.{fname} was marked @deprecated",
+            suggestion="Communicate the deprecation timeline to consumers",
+            fmt=FORMAT_GRAPHQL,
+        ))
+    elif old_dep and not new_dep:
+        out.append(make_finding(
+            "field_undeprecated", False, "info", f"{name}.{fname}",
+            f"Field {name}.{fname} @deprecated was removed",
+            fmt=FORMAT_GRAPHQL,
+        ))
 
 
 def _diff_field_type(name: str, fname: str, old_f: GraphQLField, new_f: GraphQLField, out: list) -> None:

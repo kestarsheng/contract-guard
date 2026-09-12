@@ -131,6 +131,8 @@ def _diff_operation(path, method, old_item, new_item, old_op, new_op,
                     old_doc, new_doc, out) -> None:
     loc = f"{method.upper()} {path}"
 
+    _diff_deprecated(old_op, new_op, loc, out)
+
     old_params = _collect_parameters(old_item, old_op, old_doc)
     new_params = _collect_parameters(new_item, new_op, new_doc)
     _diff_parameters(old_params, new_params, loc, old_doc, new_doc, out)
@@ -140,6 +142,24 @@ def _diff_operation(path, method, old_item, new_item, old_op, new_op,
 
     _diff_responses(old_op.get("responses") or {}, new_op.get("responses") or {},
                     loc, old_doc, new_doc, out)
+
+
+def _diff_deprecated(old_op: dict, new_op: dict, loc: str, out: list) -> None:
+    old_dep = bool(old_op.get("deprecated", False))
+    new_dep = bool(new_op.get("deprecated", False))
+    if not old_dep and new_dep:
+        out.append(make_finding(
+            "operation_deprecated", False, "minor", loc,
+            f"Operation {loc} was marked deprecated",
+            suggestion="Communicate the deprecation timeline to consumers",
+            fmt=FORMAT_OPENAPI,
+        ))
+    elif old_dep and not new_dep:
+        out.append(make_finding(
+            "operation_undeprecated", False, "info", loc,
+            f"Operation {loc} deprecation was removed",
+            fmt=FORMAT_OPENAPI,
+        ))
 
 
 def _collect_parameters(path_item: dict, op: dict, doc: dict) -> dict:
@@ -212,6 +232,32 @@ def _media_schema(obj: dict) -> dict | None:
     return first.get("schema") if first else None
 
 
+def _media_types(obj: dict) -> set:
+    content = (obj or {}).get("content")
+    if not isinstance(content, dict):
+        return set()
+    return set(content.keys())
+
+
+def _diff_content_types(old_obj, new_obj, loc: str, out: list) -> None:
+    old_types = _media_types(old_obj)
+    new_types = _media_types(new_obj)
+    for mt in sorted(old_types - new_types):
+        out.append(make_finding(
+            "content_type_removed", True, "major", loc,
+            f"Content type {render(mt)} was removed",
+            previous=mt, current=None,
+            suggestion="Clients sending this content type will be rejected",
+            fmt=FORMAT_OPENAPI,
+        ))
+    for mt in sorted(new_types - old_types):
+        out.append(make_finding(
+            "content_type_added", False, "info", loc,
+            f"Content type {render(mt)} was added",
+            fmt=FORMAT_OPENAPI,
+        ))
+
+
 def _diff_request_body(old_rb, new_rb, loc, old_doc, new_doc, out) -> None:
     old_rb = _resolve(old_rb, old_doc) if isinstance(old_rb, dict) else None
     new_rb = _resolve(new_rb, new_doc) if isinstance(new_rb, dict) else None
@@ -238,6 +284,7 @@ def _diff_request_body(old_rb, new_rb, loc, old_doc, new_doc, out) -> None:
     if not old_rb or not new_rb:
         return
 
+    _diff_content_types(old_rb, new_rb, f"{loc} -> requestBody", out)
     _diff_schema(_media_schema(old_rb), _media_schema(new_rb),
                  f"{loc} -> requestBody", old_doc, new_doc, out, set())
 
@@ -255,6 +302,7 @@ def _diff_responses(old_resp: dict, new_resp: dict, loc: str,
                 fmt=FORMAT_OPENAPI,
             ))
             continue
+        _diff_content_types(old_r, new_r, f"{loc} -> response {status}", out)
         _diff_schema(_media_schema(old_r), _media_schema(new_r),
                      f"{loc} -> response {status}", old_doc, new_doc, out, set())
 
