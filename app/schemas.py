@@ -54,3 +54,53 @@ class DiffResponse(BaseModel):
 class ErrorResponse(BaseModel):
     ok: bool = False
     error: str
+
+
+class ChainDiffRequest(BaseModel):
+    specs: list[str] = Field(..., description="Ordered list of contract versions (v1, v2, ..., vN)")
+    format: str = Field("openapi", description="openapi | graphql | json-schema")
+    use_llm: bool = False
+
+
+class ChainDiffStepResponse(BaseModel):
+    step: int
+    from_version: str
+    to_version: str
+    breaking: bool
+    breaking_count: int
+    total_changes: int
+    summary: str
+    findings: list[FindingResponse]
+
+
+class ChainDiffResponse(BaseModel):
+    format: str
+    total_steps: int
+    cumulative_breaking: bool
+    cumulative_breaking_count: int
+    steps: list[ChainDiffStepResponse]
+    summary: str
+
+
+class SemverResponse(BaseModel):
+    bump: str
+    reason: str
+    current_version: str | None = None
+    suggested_version: str | None = None
+    breaking_count: int
+    total_changes: int
+
+
+class MigrationSuggestionResponse(BaseModel):
+    change_type: str
+    location: str
+    severity: str
+    summary: str
+    migration: str
+    current_suggestion: str
+
+
+class MigrationResponse(BaseModel):
+    total_breaking: int
+    has_migration_path: bool
+    suggestions: list[MigrationSuggestionResponse]

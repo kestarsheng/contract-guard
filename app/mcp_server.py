@@ -23,7 +23,10 @@ from fastmcp import FastMCP
 
 from .config import PROJECT_SLUG, get_settings
 from .diff_core import DiffError, detect_changes, normalize_format
+from .migration import suggest_migration as _suggest_migration
 from .models import SUPPORTED_FORMATS
+from .semver import generate_changelog as _generate_changelog
+from .semver import suggest_version_bump as _suggest_version_bump
 
 mcp = FastMCP(
     PROJECT_SLUG,
@@ -34,8 +37,11 @@ mcp = FastMCP(
         "The diff is 100% deterministic and reproducible (no LLM needed for the "
         "core result). Findings with breaking=true are merge blockers; "
         "severity=critical means existing consumers will fail at runtime. "
-        "use list_supported_formats to discover accepted formats, and "
-        "explain_change_type to interpret a change_type you don't recognize."
+        "Use list_supported_formats to discover accepted formats, and "
+        "explain_change_type to interpret a change_type you don't recognize. "
+        "Use suggest_version_bump to determine the SemVer increment level. "
+        "Use generate_changelog to produce a markdown changelog for release notes. "
+        "Use suggest_migration to get concrete advice on restoring compatibility."
     ),
 )
 
@@ -70,6 +76,18 @@ _CHANGE_TYPE_DOCS = {
     "const_changed": ("A JSON Schema const value changed.", "critical", True),
     "required_property_added": ("A JSON Schema property became required.", "critical", True),
     "impact_assessment": ("LLM-generated consumer-impact assessment (advisory).", "info", False),
+    "operation_deprecated": ("An OpenAPI operation was marked deprecated.", "minor", False),
+    "operation_undeprecated": ("An OpenAPI operation's deprecation was removed.", "info", False),
+    "content_type_removed": ("A content type was removed from a request body or response.", "major", True),
+    "content_type_added": ("A content type was added to a request body or response.", "info", False),
+    "directive_removed": ("A GraphQL directive was removed from the schema.", "major", True),
+    "directive_added": ("A GraphQL directive was added to the schema.", "info", False),
+    "field_deprecated": ("A GraphQL field was marked @deprecated.", "minor", False),
+    "field_undeprecated": ("A GraphQL field's @deprecated was removed.", "info", False),
+    "prefix_items_removed": ("JSON Schema prefixItems were shortened (tuple semantics changed).", "critical", True),
+    "prefix_item_type_changed": ("A JSON Schema prefixItems entry type changed.", "critical", True),
+    "contains_removed": ("A JSON Schema contains constraint was removed.", "major", True),
+    "dependent_required_added": ("A JSON Schema dependentRequired dependency was added.", "major", True),
 }
 
 
@@ -156,6 +174,94 @@ def explain_change_type(change_type: str) -> str:
         "default_severity": severity,
         "breaking": breaking,
     }, ensure_ascii=False)
+
+
+@mcp.tool()
+def suggest_version_bump(
+    old_spec: str,
+    new_spec: str,
+    format: str = "openapi",
+    current_version: str = "",
+) -> str:
+    """Suggest the SemVer bump level (major/minor/patch) for a contract change.
+
+    Analyzes the diff and returns which version segment should be incremented
+    based on breaking vs non-breaking changes.
+
+    Args:
+        old_spec: the previous contract text.
+        new_spec: the new contract text.
+        format: "openapi" | "graphql" | "json-schema".
+        current_version: optional current version (e.g. "1.2.3") to compute the next version.
+
+    Returns:
+        JSON string with bump level, reason, and suggested next version.
+    """
+    settings = get_settings()
+    try:
+        report = detect_changes(old_spec, new_spec, format)
+    except DiffError as exc:
+        return json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=False)
+    result = _suggest_version_bump(report, current_version)
+    return json.dumps({"ok": True, **result}, ensure_ascii=False)
+
+
+@mcp.tool()
+def generate_changelog(
+    old_spec: str,
+    new_spec: str,
+    format: str = "openapi",
+    old_version: str = "",
+    new_version: str = "",
+) -> str:
+    """Generate a markdown changelog from a contract diff.
+
+    Groups findings by severity (critical/major/minor/info) and formats them
+    as a markdown document suitable for release notes.
+
+    Args:
+        old_spec: the previous contract text.
+        new_spec: the new contract text.
+        format: "openapi" | "graphql" | "json-schema".
+        old_version: optional previous version label.
+        new_version: optional new version label.
+
+    Returns:
+        JSON string with the markdown changelog.
+    """
+    try:
+        report = detect_changes(old_spec, new_spec, format)
+    except DiffError as exc:
+        return json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=False)
+    changelog = _generate_changelog(report, old_version, new_version)
+    return json.dumps({"ok": True, "changelog": changelog}, ensure_ascii=False)
+
+
+@mcp.tool()
+def suggest_migration(
+    old_spec: str,
+    new_spec: str,
+    format: str = "openapi",
+) -> str:
+    """Generate compatibility migration suggestions for breaking changes.
+
+    For each breaking change found, returns a concrete suggestion on how to
+    modify the new spec to restore backward compatibility.
+
+    Args:
+        old_spec: the previous contract text.
+        new_spec: the new contract text.
+        format: "openapi" | "graphql" | "json-schema".
+
+    Returns:
+        JSON string with migration suggestions for each breaking change.
+    """
+    try:
+        report = detect_changes(old_spec, new_spec, format)
+    except DiffError as exc:
+        return json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=False)
+    result = _suggest_migration(report)
+    return json.dumps({"ok": True, **result}, ensure_ascii=False)
 
 
 def main() -> None:

@@ -270,3 +270,147 @@ def test_detect_changes_equivalent():
     report = detect_changes(spec, spec, "openapi")
     assert report.breaking is False
     assert report.total_changes == 0
+
+
+# --------------------------------------------------------------------------- #
+# Enhanced detection rules
+# --------------------------------------------------------------------------- #
+def test_openapi_content_type_removed():
+    old = {"openapi": "3.0.0", "paths": {"/upload": {"post": {
+        "requestBody": {"content": {"application/json": {"schema": {"type": "object"}}},
+                          "required": True}}}}}
+    new = {"openapi": "3.0.0", "paths": {"/upload": {"post": {
+        "requestBody": {"content": {"multipart/form-data": {"schema": {"type": "object"}}},
+                          "required": True}}}}}
+    f = diff_openapi(old, new)
+    assert _has(f, "content_type_removed", breaking=True)
+
+
+def test_openapi_operation_deprecated():
+    old = _oa({"/old": {"get": _op()}})
+    new = {"openapi": "3.0.0", "paths": {"/old": {"get": {**_op(), "deprecated": True}}}}
+    f = diff_openapi(old, new)
+    assert _has(f, "operation_deprecated", breaking=False)
+
+
+def test_graphql_directive_removed():
+    old = _gql("directive @cache on FIELD_DEFINITION\ntype Query { a: String @cache }")
+    new = _gql("type Query { a: String }")
+    f = diff_graphql(old, new)
+    assert _has(f, "directive_removed", breaking=True)
+
+
+def test_jsonschema_prefix_items_removed():
+    old = {"type": "array", "prefixItems": [{"type": "string"}, {"type": "integer"}]}
+    new = {"type": "array", "prefixItems": [{"type": "string"}]}
+    f = diff_json_schema(old, new)
+    assert _has(f, "prefix_items_removed", breaking=True)
+
+
+def test_jsonschema_contains_constraint():
+    old = {"type": "array", "contains": {"type": "string"}, "minContains": 1}
+    new = {"type": "array", "contains": {"type": "string"}, "minContains": 3}
+    f = diff_json_schema(old, new)
+    assert _has(f, "constraint_tightened", breaking=True)
+
+
+def test_jsonschema_dependent_required():
+    old = {"type": "object", "properties": {"a": {"type": "string"}, "b": {"type": "string"}},
+           "dependentRequired": {"a": []}}
+    new = {"type": "object", "properties": {"a": {"type": "string"}, "b": {"type": "string"}},
+           "dependentRequired": {"a": ["b"]}}
+    f = diff_json_schema(old, new)
+    assert _has(f, "dependent_required_added", breaking=True)
+
+
+def test_jsonschema_unevaluated_properties():
+    old = {"type": "object", "properties": {"a": {"type": "string"}}}
+    new = {"type": "object", "properties": {"a": {"type": "string"}},
+           "unevaluatedProperties": False}
+    f = diff_json_schema(old, new)
+    assert _has(f, "constraint_tightened", breaking=True)
+
+
+# --------------------------------------------------------------------------- #
+# SemVer + Changelog
+# --------------------------------------------------------------------------- #
+def test_semver_major_bump():
+    from app.diff_core import detect_changes
+    from app.semver import suggest_version_bump
+    old = json.dumps(_oa({"/users": {"get": _op()}}))
+    new = json.dumps(_oa({}))
+    report = detect_changes(old, new, "openapi")
+    result = suggest_version_bump(report, "1.2.3")
+    assert result["bump"] == "major"
+    assert result["suggested_version"] == "2.0.0"
+
+
+def test_semver_patch_bump():
+    from app.diff_core import detect_changes
+    from app.semver import suggest_version_bump
+    old = json.dumps(_oa({"/users": {"get": _op()}}))
+    new = json.dumps(_oa({"/users": {"get": _op()}, "/posts": {"get": _op()}}))
+    report = detect_changes(old, new, "openapi")
+    result = suggest_version_bump(report, "1.2.3")
+    assert result["bump"] == "patch"
+    assert result["suggested_version"] == "1.2.4"
+
+
+def test_changelog_generation():
+    from app.diff_core import detect_changes
+    from app.semver import generate_changelog
+    old = json.dumps(_oa({"/users": {"get": _op()}}))
+    new = json.dumps(_oa({}))
+    report = detect_changes(old, new, "openapi")
+    changelog = generate_changelog(report, "1.0.0", "2.0.0")
+    assert "## API Contract Changes" in changelog
+    assert "Breaking Changes" in changelog
+
+
+# --------------------------------------------------------------------------- #
+# Migration suggestions
+# --------------------------------------------------------------------------- #
+def test_migration_suggestions():
+    from app.diff_core import detect_changes
+    from app.migration import suggest_migration
+    old = json.dumps(_oa({"/users": {"get": _op()}}))
+    new = json.dumps(_oa({}))
+    report = detect_changes(old, new, "openapi")
+    result = suggest_migration(report)
+    assert result["total_breaking"] > 0
+    assert result["has_migration_path"] is True
+    assert len(result["suggestions"]) > 0
+    assert "migration" in result["suggestions"][0]
+
+
+# --------------------------------------------------------------------------- #
+# SARIF export
+# --------------------------------------------------------------------------- #
+def test_sarif_export():
+    from app.diff_core import detect_changes
+    from app.sarif import export_sarif
+    old = json.dumps(_oa({"/users": {"get": _op()}}))
+    new = json.dumps(_oa({}))
+    report = detect_changes(old, new, "openapi")
+    sarif = export_sarif(report)
+    assert sarif["version"] == "2.1.0"
+    assert len(sarif["runs"]) == 1
+    assert sarif["runs"][0]["tool"]["driver"]["name"] == "Contract Guard"
+    assert len(sarif["runs"][0]["results"]) > 0
+
+
+# --------------------------------------------------------------------------- #
+# Chain diff
+# --------------------------------------------------------------------------- #
+def test_chain_diff():
+    from app.diff_core import detect_changes
+    v1 = json.dumps(_oa({"/users": {"get": _op()}}))
+    v2 = json.dumps(_oa({"/users": {"get": _op()}, "/posts": {"get": _op()}}))
+    v3 = json.dumps(_oa({"/users": {"get": _op()}}))
+
+    r1 = detect_changes(v1, v2, "openapi")
+    r2 = detect_changes(v2, v3, "openapi")
+
+    assert r1.breaking is False
+    assert r2.breaking is True
+    assert r2.breaking_count >= 1
