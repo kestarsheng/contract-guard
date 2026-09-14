@@ -195,12 +195,12 @@ footer a:hover{color:var(--text)}
 </head>
 <body>
 <header>
-  <div class="logo"><span class="mark">◆</span> Contract Guard</div>
+  <div class="logo"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;vertical-align:middle"><path d="M6 3h12l4 6-10 13L2 9Z"/></svg></span> Contract Guard</div>
   <nav>
     <a href="/docs">API</a>
     <a href="/v1/formats">Formats</a>
     <button id="lang-toggle" type="button">中文</button>
-    <a href="https://github.com/kestarsheng/contract-guard" target="_blank" rel="noopener">GitHub ↗</a>
+    <a href="https://github.com/kestarsheng/contract-guard" target="_blank" rel="noopener">GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;vertical-align:middle"><path d="M7 17L17 7M7 7H17V17"/></svg></a>
   </nav>
 </header>
 
@@ -422,6 +422,7 @@ footer a:hover{color:var(--text)}
 </footer>
 
 <script>
+function icon(n){const P={diamond:'<path d="M6 3h12l4 6-10 13L2 9Z"/>',check:'<path d="M20 6 9 17l-5-5"/>',x:'<path d="M18 6L6 18M6 6L18 18"/>','arrow-right':'<path d="M5 12H19M12 5L19 12L12 19"/>','arrow-up-right':'<path d="M7 17L17 7M7 7H17V17"/>'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;vertical-align:middle">${P[n]||''}</svg>`}
 const I18N={
   en:{
     "hero.h1":"Catch API breaking changes before they ship",
@@ -719,7 +720,7 @@ function renderError(el,msg){el.innerHTML=`<div class="error-state">${escapeHtml
 function busy(btn,on){btn.disabled=on;btn.querySelector(".spinner").style.display=on?"inline-block":"none";btn.querySelector("span:not(.spinner)").textContent=on?t("btn.running"):btn.dataset.label}
 async function post(path,payload){const resp=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const data=await resp.json();if(!resp.ok)throw new Error(data.error||("HTTP "+resp.status));return data}
 function findingHtml(f){
-  const diff=(f.previous||f.current)?`<div class="f-diff">${f.previous?`<span class="prev">${escapeHtml(f.previous)}</span>`:""}<span class="arrow">→</span>${f.current?`<span class="curr">${escapeHtml(f.current)}</span>`:"<span class='curr'>(removed)</span>"}</div>`:"";
+  const diff=(f.previous||f.current)?`<div class="f-diff">${f.previous?`<span class="prev">${escapeHtml(f.previous)}</span>`:""}<span class="arrow">${icon("arrow-right")}</span>${f.current?`<span class="curr">${escapeHtml(f.current)}</span>`:"<span class='curr'>(removed)</span>"}</div>`:"";
   const sug=f.suggestion?`<div class="f-sug">${escapeHtml(f.suggestion)}</div>`:"";
   return `<div class="finding" data-break="${f.breaking}">
     <div class="f-head"><span class="sev" data-s="${f.severity}"></span><span class="ctype">${escapeHtml(f.change_type)}</span><span class="src ${f.source}">${f.source}</span></div>
@@ -806,7 +807,7 @@ document.getElementById("s-run").addEventListener("click",async()=>{
 });
 function renderSemver(res,data){
   const bump=data.bump||"patch";
-  const versions=data.current_version&&data.suggested_version?`<div class="semver-versions"><span class="old">${escapeHtml(data.current_version)}</span><span class="arrow">→</span><span class="new">${escapeHtml(data.suggested_version)}</span></div>`:"";
+  const versions=data.current_version&&data.suggested_version?`<div class="semver-versions"><span class="old">${escapeHtml(data.current_version)}</span><span class="arrow">${icon("arrow-right")}</span><span class="new">${escapeHtml(data.suggested_version)}</span></div>`:"";
   res.innerHTML=`<div class="semver-card"><div class="bump-badge ${bump}">${t("bump."+bump)}</div><div class="semver-meta"><div class="reason">${t("bump.reason")}: ${escapeHtml(data.reason||"")} (${data.breaking_count} ${t("breaking")}, ${data.total_changes} ${t("findings")})</div>${versions}</div></div>`;
 }
 
@@ -823,7 +824,7 @@ document.getElementById("m-run").addEventListener("click",async()=>{
   finally{btn.disabled=false;btn.querySelector(".spinner").style.display="none";btn.querySelector("span:not(.spinner)").textContent=old}
 });
 function renderMigration(res,data){
-  if(data.total_breaking===0||data.suggestions.length===0){res.innerHTML=`<div class="empty-state"><div class="icon">✓</div><h3>${t("migration.empty")}</h3></div>`;return}
+  if(data.total_breaking===0||data.suggestions.length===0){res.innerHTML=`<div class="empty-state"><div class="icon">${icon("check")}</div><h3>${t("migration.empty")}</h3></div>`;return}
   let html=`<div class="summary-card clean" style="margin-bottom:14px"><span class="count-chip" data-s="critical">${data.total_breaking} ${t("migration.total")}</span>${data.has_migration_path?'':''}</div>`;
   html+=data.suggestions.map(s=>`<div class="mig-card"><div class="mig-head"><span class="sev" data-s="${s.severity}"></span><span class="ctype">${escapeHtml(s.change_type)}</span><span class="mig-loc">${escapeHtml(s.location)}</span></div><div class="mig-body"><div>${escapeHtml(s.summary)}</div>${s.migration?`<div class="mig-fix">${escapeHtml(s.migration)}</div>`:""}</div></div>`).join("");
   res.innerHTML=html;
@@ -885,7 +886,7 @@ document.getElementById("i-run").addEventListener("click",async()=>{
   finally{btn.disabled=false;btn.querySelector(".spinner").style.display="none";btn.querySelector("span:not(.spinner)").textContent=old}
 });
 function impactHitHtml(f){
-  const diff=(f.previous||f.current)?`<div class="f-diff">${f.previous?`<span class="prev">${escapeHtml(f.previous)}</span>`:""}<span class="arrow">→</span>${f.current?`<span class="curr">${escapeHtml(f.current)}</span>`:"<span class='curr'>(removed)</span>"}</div>`:"";
+  const diff=(f.previous||f.current)?`<div class="f-diff">${f.previous?`<span class="prev">${escapeHtml(f.previous)}</span>`:""}<span class="arrow">${icon("arrow-right")}</span>${f.current?`<span class="curr">${escapeHtml(f.current)}</span>`:"<span class='curr'>(removed)</span>"}</div>`:"";
   const sug=f.suggestion?`<div class="f-sug">${escapeHtml(f.suggestion)}</div>`:"";
   const ops=f.affected_operations&&f.affected_operations.length?`<div class="impact-ops"><b>${t("impact.ops")}:</b> ${f.affected_operations.map(escapeHtml).join(" · ")}</div>`:"";
   return `<div class="finding" data-break="${f.breaking}">
@@ -906,7 +907,7 @@ function renderImpact(res,data){
   const hits=(data.hits||[]).map(impactHitHtml).join("");
   const missHtml=(data.misses||[]).map(f=>`<div class="finding" data-break="false" style="opacity:.55"><div class="f-head"><span class="sev" data-s="info"></span><span class="ctype">${escapeHtml(f.change_type)}</span><span class="src confirmed">ignored</span></div><div class="f-loc">${escapeHtml(f.location)}</div><div class="f-sum">${escapeHtml(f.summary)}</div></div>`).join("");
   let html=`<div class="summary-card ${isBad?"breaking":"clean"}">${status}<div class="counts">${chips}</div>${copy}<div class="summary-text">${escapeHtml(data.summary)}</div>${ops}</div>`;
-  html+=`<div class="findings"><div class="impact-group">${hits||`<div class="empty-state"><div class="icon">✓</div><h3>${t("impact.noHits")}</h3></div>`}</div></div>`;
+  html+=`<div class="findings"><div class="impact-group">${hits||`<div class="empty-state"><div class="icon">${icon("check")}</div><h3>${t("impact.noHits")}</h3></div>`}</div></div>`;
   if(missHtml)html+=`<details class="misses"><summary>${t("impact.missesTitle")} (${data.miss_count})</summary><div class="findings">${missHtml}</div></details>`;
   res.innerHTML=html;
   const cb=res.querySelector("[data-copy]");if(cb)cb.textContent=t("copy");
@@ -925,11 +926,11 @@ document.getElementById("b-run").addEventListener("click",async()=>{
 function renderBench(res,data){
   const score=[["accuracy",data.accuracy],["precision",data.precision],["recall",data.recall],["F1",data.f1]];
   const cards=score.map(([k,v])=>`<div class="stat" style="min-width:110px"><b data-c="${v>=0.99?"minor":"major"}">${v}</b><span>${k}</span></div>`).join("");
-  const rows=data.results.map(r=>`<tr><td>${escapeHtml(r.name)}</td><td>${r.format}</td><td class="${r.correct?"ok":"err"}">${r.correct?"✓":"✗"}</td></tr>`).join("");
+  const rows=data.results.map(r=>`<tr><td>${escapeHtml(r.name)}</td><td>${r.format}</td><td class="${r.correct?"ok":"err"}">${r.correct?icon("check"):icon("x")}</td></tr>`).join("");
   res.innerHTML=`<div class="bench-card"><div class="panel-head"><h2>${t("bench.title")}</h2><p>${t("bench.sub")} — ${data.total_samples} ${t("bench.samples")}, ${data.correct}/${data.total_samples} ${t("bench.correct")}</p></div><div class="hero-stats" style="margin:14px 0">${cards}</div><div class="conf">TP ${data.confusion.tp} · FP ${data.confusion.fp} · FN ${data.confusion.fn} · TN ${data.confusion.tn}</div><table class="bench-table"><thead><tr><th>sample</th><th>format</th><th>${t("bench.ok")}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
-document.querySelectorAll(".panel").forEach(p=>{if(p.id!=="panel-mcp"){const key=p.id.replace("panel-","");p.querySelector(".result").innerHTML=`<div class="empty-state"><div class="icon">◆</div><h3>${t("empty.title")}</h3><p>${t("empty.desc")}</p></div>`}});
+document.querySelectorAll(".panel").forEach(p=>{if(p.id!=="panel-mcp"){const key=p.id.replace("panel-","");p.querySelector(".result").innerHTML=`<div class="empty-state"><div class="icon">${icon("diamond")}</div><h3>${t("empty.title")}</h3><p>${t("empty.desc")}</p></div>`}});
 applyI18n();
 </script>
 </body>
