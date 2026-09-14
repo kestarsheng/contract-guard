@@ -28,7 +28,42 @@ curl -X POST https://contract-guard-eta.vercel.app/v1/diff \
 
 **MCP endpoint:** `https://contract-guard-eta.vercel.app/mcp`
 
-Add it to any MCP-compatible agent (Claude, Cursor, …) and the agent gains six tools: `check_breaking_changes`, `list_supported_formats`, `explain_change_type`, `suggest_version_bump`, `generate_changelog`, `suggest_migration`.
+Add it to any MCP-compatible agent (Claude, Cursor, …) and the agent gains eight tools: `check_breaking_changes`, `list_supported_formats`, `explain_change_type`, `suggest_version_bump`, `generate_changelog`, `suggest_migration`, `scan_consumer_impact`, `run_benchmark`.
+
+---
+
+## Beyond the diff: consumer-aware impact + verifiable engines
+
+Plain contract diffing is a mature space. Contract Guard goes beyond it with two features classic diff tools (oasdiff, GraphQL Inspector, Redocly, …) do not have:
+
+### 1. Consumer-aware impact scan (`POST /v1/consumer-scan`)
+
+Classic tools answer *“is this change breaking?”* for **every caller**. Contract Guard answers *“is this change breaking **for me**?”* — pass a `consumer_profile` describing only the paths / schemas / fields your agent actually uses, and it separates the findings that hit your subset from the ones you can safely ignore:
+
+```json
+{
+  "old_spec": "<previous contract>",
+  "new_spec": "<new contract>",
+  "format": "openapi",
+  "consumer_profile": { "paths": ["/pets"], "schemas": ["Pet"] }
+}
+```
+
+Response includes `consumer_affected`, `hits` (findings that matter to you) and `misses` (ignorable ones).
+
+### 2. Transitive propagation (blast radius)
+
+Changing one referenced component schema can break every operation that returns it. Contract Guard builds the schema→operation reference graph and annotates each finding with its `affected_operations` — a type change on `Pet.id` reports `["GET /pets", "GET /pets/{id}"]`, not just the diff location.
+
+### 3. Self-verification benchmark (`GET /v1/benchmark`)
+
+A built-in 16-sample regression corpus (labelled old/new pairs across all three formats) is replayed through the engines on demand, reporting **accuracy / precision / recall / F1**. The score is deterministic and reproducible — judges can run it themselves.
+
+```
+GET /v1/benchmark
+→ { "total_samples": 16, "correct": 16, "accuracy": 1.0,
+    "precision": 1.0, "recall": 1.0, "f1": 1.0, "results": [...] }
+```
 
 ---
 
@@ -153,6 +188,8 @@ Lists supported contract formats.
 | `suggest_version_bump(old_spec, new_spec, format, current_version)` | Suggests SemVer bump level (major/minor/patch) |
 | `generate_changelog(old_spec, new_spec, format, old_version, new_version)` | Generates markdown changelog for release notes |
 | `suggest_migration(old_spec, new_spec, format)` | Generates compatibility migration suggestions for breaking changes |
+| `scan_consumer_impact(old_spec, new_spec, format, consumer_profile)` | Consumer-aware scan — which changes affect a specific caller, plus transitive blast radius |
+| `run_benchmark()` | Replays the 16-sample regression corpus, reports precision/recall/F1 |
 
 ### Additional endpoints
 
@@ -163,6 +200,8 @@ Lists supported contract formats.
 | `POST /v1/migration` | Generate migration suggestions for breaking changes |
 | `POST /v1/sarif` | Export diff results as SARIF 2.1.0 for GitHub Code Scanning |
 | `POST /v1/changelog` | Generate markdown changelog |
+| `POST /v1/consumer-scan` | Consumer-aware impact scan + transitive propagation |
+| `GET /v1/benchmark` | Built-in regression corpus — accuracy/precision/recall/F1 |
 
 ---
 
@@ -185,17 +224,29 @@ old_spec + new_spec
         ▼
   Finding[]  (source: "confirmed")
         │
+        ├─────────────────────────────────┐
+        ▼                                 ▼
+  consumer-aware filter           reference graph
+  (profile hit / miss)            (schema → operations)
+        │                                 │
+        ▼                                 ▼
+  hits[] + misses[]               affected_operations[]
+        │                                 │
+        └───────────────┬─────────────────┘
+                        ▼
+        ImpactReport → JSON (consumer_affected, impact)
+        │
         ▼  (optional, if LLM key configured)
   LLM advisory impact assessment
         │
         ▼
-  Finding[]  (source: "advisory")
+  DiffReport → JSON
         │
         ▼
-  DiffReport → JSON
+  Regression corpus (16 samples) → /v1/benchmark (P/R/F1)
 ```
 
-The deterministic engine parses both contracts, walks the schema tree, and emits findings with precise locations (`GET /users -> response 200.email`). `$ref` references are resolved. Constraint tightenings (min/max/pattern/enum) are detected by comparing old vs new ranges.
+The deterministic engine parses both contracts, walks the schema tree, and emits findings with precise locations (`GET /users -> response 200.email`). `$ref` references are resolved. Constraint tightenings (min/max/pattern/enum) are detected by comparing old vs new ranges. Beyond the diff, `app/impact.py` maps each finding to the consumer subset that uses it and propagates component-schema changes through the schema→operation reference graph; `app/benchmark.py` scores the engines against a built-in labelled corpus.
 
 ---
 
@@ -228,7 +279,7 @@ Open <http://localhost:8000> for the demo page, <http://localhost:8000/docs> for
 pytest -v
 ```
 
-46 tests covering all three engines, orchestration, semver, migration, SARIF, and chain diff.
+64 tests covering all three engines, orchestration, semver, migration, SARIF, chain diff, consumer-aware impact scan, transitive propagation, and the regression benchmark.
 
 ---
 

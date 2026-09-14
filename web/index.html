@@ -170,6 +170,18 @@ textarea::placeholder{color:var(--faint)}
 .error-state{padding:18px 22px;background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.3);border-radius:var(--radius);color:var(--critical);font-size:13.5px;margin-bottom:16px}
 
 .mcp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.impact-ops{margin-top:10px;font-size:12.5px;color:var(--dim);font-family:var(--mono)}
+.impact-group{margin-bottom:14px}
+.misses{margin-top:12px;border:1px solid var(--border);border-radius:var(--radius);padding:0 14px;background:var(--surface)}
+.misses summary{cursor:pointer;padding:12px 0;font-size:13px;color:var(--dim);font-weight:600}
+.misses .findings{padding-bottom:12px}
+.bench-card{border:1px solid var(--border);border-radius:var(--radius);padding:18px;background:var(--surface);margin-top:14px}
+.bench-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:12.5px;font-family:var(--mono)}
+.bench-table th,.bench-table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left}
+.bench-table th{color:var(--dim);font-weight:600}
+.bench-table td.ok{color:var(--brand)}
+.bench-table td.err{color:var(--major)}
+.conf{font-size:12.5px;color:var(--dim);margin-top:8px;font-family:var(--mono)}
 .mcp-card{padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transition:border-color .15s,transform .1s}
 .mcp-card:hover{border-color:var(--border-hi);transform:translateY(-2px)}
 .mcp-card .mcp-name{font-family:var(--mono);font-size:13.5px;color:var(--brand);font-weight:700}
@@ -198,8 +210,9 @@ footer a:hover{color:var(--text)}
   <div class="hero-stats">
     <div class="stat"><b data-c="brand" data-i18n-dyn="stat.rules">35+</b><span data-i18n="stat.rulesL">detection rules</span></div>
     <div class="stat"><b data-c="minor" data-i18n-dyn="stat.formats">3</b><span data-i18n="stat.formatsL">contract formats</span></div>
-    <div class="stat"><b data-c="major" data-i18n-dyn="stat.tools">6</b><span data-i18n="stat.toolsL">MCP tools</span></div>
-    <div class="stat"><b data-c="brand" data-i18n-dyn="stat.endpoints">6</b><span data-i18n="stat.endpointsL">REST endpoints</span></div>
+    <div class="stat"><b data-c="major" data-i18n-dyn="stat.tools">8</b><span data-i18n="stat.toolsL">MCP tools</span></div>
+    <div class="stat"><b data-c="brand" data-i18n-dyn="stat.endpoints">8</b><span data-i18n="stat.endpointsL">REST endpoints</span></div>
+    <div class="stat"><b data-c="minor" data-i18n-dyn="stat.f1">1.0</b><span data-i18n="stat.f1L">benchmark F1</span></div>
   </div>
   <div class="badges">
     <span class="badge"><span class="dot"></span><span data-i18n="badge.det">Deterministic</span></span>
@@ -216,7 +229,8 @@ footer a:hover{color:var(--text)}
     <button data-tab="migration"><span class="idx">04</span><span data-i18n="tab.migration">Migration</span></button>
     <button data-tab="sarif"><span class="idx">05</span><span data-i18n="tab.sarif">SARIF</span></button>
     <button data-tab="changelog"><span class="idx">06</span><span data-i18n="tab.changelog">Changelog</span></button>
-    <button data-tab="mcp"><span class="idx">07</span><span data-i18n="tab.mcp">MCP tools</span></button>
+    <button data-tab="impact"><span class="idx">07</span><span data-i18n="tab.impact">Impact scan</span></button>
+    <button data-tab="mcp"><span class="idx">08</span><span data-i18n="tab.mcp">MCP tools</span></button>
   </div>
 
   <div id="panel-diff" class="panel active">
@@ -367,6 +381,36 @@ footer a:hover{color:var(--text)}
     <div class="result" id="g-result"></div>
   </div>
 
+  <div id="panel-impact" class="panel">
+    <div class="panel-head"><h2 data-i18n="impact.title">Consumer-aware impact scan</h2><p data-i18n="impact.sub">Which changes actually affect the paths / schemas / fields your agent uses? Classic diff tools answer "is it breaking for everyone" — this answers "is it breaking for me".</p></div>
+    <div class="format-row"><span class="lbl" data-i18n="common.format">Format</span><div class="pill-group" data-fmt-group>
+      <button data-fmt="openapi" class="active">OpenAPI 3.x</button>
+      <button data-fmt="graphql">GraphQL SDL</button>
+      <button data-fmt="json-schema">JSON Schema</button>
+    </div></div>
+    <div class="contract-grid">
+      <div class="contract-cell">
+        <label><span data-i18n="label.old">Previous contract</span> <span class="ver v1">v1</span></label>
+        <textarea id="i-old" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+      <div class="contract-cell">
+        <label><span data-i18n="label.new">New contract</span> <span class="ver v2">v2</span></label>
+        <textarea id="i-new" spellcheck="false" placeholder='{ "openapi": "3.0.0", ... }'></textarea>
+      </div>
+    </div>
+    <div class="contract-cell" style="margin-bottom:16px">
+      <label><span data-i18n="impact.profileL">Consumer profile (JSON)</span> <span class="ver v2" data-i18n="impact.profileHint">what you use</span></label>
+      <textarea id="i-profile" spellcheck="false" style="height:64px" placeholder='{"paths": ["/users"], "schemas": ["User"]}'></textarea>
+    </div>
+    <div class="actions">
+      <button id="i-run" class="btn-primary" type="button"><span class="spinner"></span><span data-i18n="btn.impact">Scan my impact</span></button>
+      <button id="i-example" class="btn-ghost" type="button" data-i18n="btn.example">Load example</button>
+      <button id="b-run" class="btn-ghost" type="button" style="margin-left:auto"><span class="spinner"></span><span data-i18n="btn.bench">Run benchmark</span></button>
+    </div>
+    <div class="result" id="i-result"></div>
+    <div class="result" id="b-result"></div>
+  </div>
+
   <div id="panel-mcp" class="panel">
     <div class="panel-head"><h2 data-i18n="mcp.title">MCP tools for AI agents</h2><p data-i18n="mcp.sub">Point any MCP-compatible agent at the /mcp endpoint and it gains six tools out of the box.</p></div>
     <div class="mcp-grid" id="mcp-grid"></div>
@@ -382,27 +426,31 @@ const I18N={
   en:{
     "hero.h1":"Catch API breaking changes before they ship",
     "hero.p":"A deterministic compatibility checker built for AI agents. Compare two OpenAPI, GraphQL, or JSON Schema contracts and get structured, reproducible findings — the core diff runs without any LLM.",
-    "stat.rules":"35+","stat.rulesL":"detection rules","stat.formats":"3","stat.formatsL":"contract formats","stat.tools":"6","stat.toolsL":"MCP tools","stat.endpoints":"6","stat.endpointsL":"REST endpoints",
+    "stat.rules":"35+","stat.rulesL":"detection rules","stat.formats":"3","stat.formatsL":"contract formats","stat.tools":"8","stat.toolsL":"MCP tools","stat.endpoints":"8","stat.endpointsL":"REST endpoints","stat.f1":"1.0","stat.f1L":"benchmark F1",
     "badge.det":"Deterministic","badge.mcp":"MCP-ready","badge.rep":"100% reproducible",
-    "tab.diff":"Breaking diff","tab.chain":"Chain diff","tab.semver":"SemVer","tab.migration":"Migration","tab.sarif":"SARIF","tab.changelog":"Changelog","tab.mcp":"MCP tools",
+    "tab.diff":"Breaking diff","tab.chain":"Chain diff","tab.semver":"SemVer","tab.migration":"Migration","tab.sarif":"SARIF","tab.changelog":"Changelog","tab.impact":"Impact scan","tab.mcp":"MCP tools",
     "diff.title":"Breaking change diff","diff.sub":"Compare two contract versions and get a structured, reproducible finding set.",
     "chain.title":"Multi-version chain diff","chain.sub":"Analyze v1 → v2 → … → vN transitions across three contract versions.",
     "semver.title":"SemVer version suggestion","semver.sub":"Derive the required major / minor / patch bump from a diff result.",
     "migration.title":"Compatibility migrations","migration.sub":"Get step-by-step migration suggestions for every breaking change.",
     "sarif.title":"SARIF 2.1.0 export","sarif.sub":"Export diff results as SARIF for GitHub Code Scanning and other static-analysis tooling.",
     "changelog.title":"Release changelog","changelog.sub":"Generate markdown release notes directly from contract changes.",
-    "mcp.title":"MCP tools for AI agents","mcp.sub":"Point any MCP-compatible agent at the /mcp endpoint and it gains six tools out of the box.",
+    "impact.title":"Consumer-aware impact scan","impact.sub":"Which changes actually affect the paths / schemas / fields your agent uses? Classic diff tools answer 'is it breaking for everyone' — this answers 'is it breaking for me'.",
+    "impact.profileL":"Consumer profile (JSON)","impact.profileHint":"what you use",
+    "impact.affected":"affect you","impact.clean":"No changes affect your consumer subset","impact.hits":"hit","impact.misses":"ignorable","impact.ops":"Affected operations","impact.noHits":"No changes hit your consumer subset","impact.missesTitle":"Ignorable changes (not in your subset)",
+    "bench.title":"Regression benchmark","bench.sub":"16 labelled samples replayed through the deterministic engines","bench.samples":"samples","bench.correct":"correct","bench.ok":"pass",
+    "mcp.title":"MCP tools for AI agents","mcp.sub":"Point any MCP-compatible agent at the /mcp endpoint and it gains eight tools out of the box.",
     "common.format":"Format",
     "label.old":"Previous contract","label.new":"New contract","label.v1":"Version 1","label.v2":"Version 2","label.v3":"Version 3",
     "btn.run":"Check breaking changes","btn.running":"Analyzing…","btn.example":"Load example",
-    "btn.chain":"Run chain analysis","btn.semver":"Suggest version bump","btn.migration":"Generate migrations","btn.sarif":"Export SARIF","btn.changelog":"Generate changelog",
+    "btn.chain":"Run chain analysis","btn.semver":"Suggest version bump","btn.migration":"Generate migrations","btn.sarif":"Export SARIF","btn.changelog":"Generate changelog","btn.impact":"Scan my impact","btn.bench":"Run benchmark",
     "empty.title":"No analysis yet","empty.desc":"Paste two contract versions and run the check, or load an example to see it in action.",
     "breaking":"breaking changes","clean":"No breaking changes","nochanges":"No changes detected — the contracts are equivalent.",
     "findings":"findings","copy":"Copy JSON","copied":"Copied!","download":"Download","step":"Step",
     "bump.major":"MAJOR","bump.minor":"MINOR","bump.patch":"PATCH","bump.reason":"Required bump","bump.versions":"Suggested version",
     "migration.empty":"No breaking changes found — nothing to migrate.","migration.total":"breaking change(s) with migration paths",
     "sarif.download":"Download SARIF","sarif.note":"SARIF report generated.",
-    "emptyM":{"migration":"No breaking changes found — nothing to migrate.","sarif":"Generate a SARIF report first.","changelog":"Generate a changelog first.","semver":"Run a version analysis first.","chain":"Run a chain analysis first.","diff":"No analysis yet."},
+    "emptyM":{"migration":"No breaking changes found — nothing to migrate.","sarif":"Generate a SARIF report first.","changelog":"Generate a changelog first.","semver":"Run a version analysis first.","chain":"Run a chain analysis first.","diff":"No analysis yet.","impact":"Run an impact scan or the benchmark first."},
     "mcp.t1":"Core diff — returns full finding report as JSON string",
     "mcp.t1a":"old_spec, new_spec, format, use_llm?",
     "mcp.t2":"Instant, free — lists accepted contract formats",
@@ -413,34 +461,41 @@ const I18N={
     "mcp.t4a":"old_spec, new_spec, format, current_version",
     "mcp.t5":"Generates markdown changelog for release notes",
     "mcp.t5a":"old_spec, new_spec, format, old_version, new_version",
-    "mcp.t6":"Generates compatibility migration suggestions for breaking changes",
+"mcp.t6":"Generates compatibility migration suggestions for breaking changes",
     "mcp.t6a":"old_spec, new_spec, format",
-    "footer":"Built for the X-Agent MCP Hackathon 2026 · Deterministic diff engine · "
+    "mcp.t7":"Consumer-aware impact scan — which changes affect YOUR paths/schemas, plus transitive blast radius",
+    "mcp.t7a":"old_spec, new_spec, format, consumer_profile",
+    "mcp.t8":"Replays the 16-sample regression corpus; reports precision/recall/F1",
+    "mcp.t8a":""
   },
   zh:{
     "hero.h1":"在发布前拦截 API 破坏性变更",
     "hero.p":"面向 AI Agent 的确定性兼容性检查器。对比两份 OpenAPI、GraphQL 或 JSON Schema 契约，返回结构化、可复现的结果——核心检测无需任何 LLM。",
-    "stat.rules":"35+","stat.rulesL":"条检测规则","stat.formats":"3","stat.formatsL":"种契约格式","stat.tools":"6","stat.toolsL":"个 MCP 工具","stat.endpoints":"6","stat.endpointsL":"个 REST 端点",
+    "stat.rules":"35+","stat.rulesL":"条检测规则","stat.formats":"3","stat.formatsL":"种契约格式","stat.tools":"8","stat.toolsL":"个 MCP 工具","stat.endpoints":"8","stat.endpointsL":"个 REST 端点","stat.f1":"1.0","stat.f1L":"基准 F1",
     "badge.det":"确定性","badge.mcp":"可 Agent 化","badge.rep":"100% 可复现",
-    "tab.diff":"破坏性 diff","tab.chain":"链式 diff","tab.semver":"语义化版本","tab.migration":"迁移建议","tab.sarif":"SARIF","tab.changelog":"更新日志","tab.mcp":"MCP 工具",
+    "tab.diff":"破坏性 diff","tab.chain":"链式 diff","tab.semver":"语义化版本","tab.migration":"迁移建议","tab.sarif":"SARIF","tab.changelog":"更新日志","tab.impact":"影响扫描","tab.mcp":"MCP 工具",
     "diff.title":"破坏性变更检测","diff.sub":"对比两份契约版本，返回结构化、可复现的检测结果。",
     "chain.title":"多版本链式分析","chain.sub":"跨三个契约版本分析 v1 → v2 → … → vN 的逐段变更。",
     "semver.title":"SemVer 版本建议","semver.sub":"根据 diff 结果推导需要的 major / minor / patch 版本升级。",
     "migration.title":"兼容性迁移建议","migration.sub":"为每一条破坏性变更生成逐步迁移建议。",
     "sarif.title":"SARIF 2.1.0 导出","sarif.sub":"将 diff 结果导出为 SARIF，可直接接入 GitHub Code Scanning 等静态分析工具。",
     "changelog.title":"发布更新日志","changelog.sub":"直接根据契约变更生成 markdown 发布说明。",
-    "mcp.title":"面向 AI Agent 的 MCP 工具","mcp.sub":"让任意 MCP 兼容 Agent 指向 /mcp 端点，即可开箱获得六个工具。",
+    "impact.title":"消费者感知影响扫描","impact.sub":"哪条变更真正影响你的 Agent 使用的 path / schema / 字段？传统 diff 工具回答"它对所有人是否破坏性"——这里回答"它对我是否破坏性"。",
+    "impact.profileL":"消费者画像（JSON）","impact.profileHint":"你使用的内容",
+    "impact.affected":"影响你","impact.clean":"无变更命中你的消费者子集","impact.hits":"命中","impact.misses":"可忽略","impact.ops":"受影响操作","impact.noHits":"无变更命中你的消费者子集","impact.missesTitle":"可忽略的变更（不在你的子集内）",
+    "bench.title":"回归基准","bench.sub":"16 组带标注样本回放确定性引擎","bench.samples":"组样本","bench.correct":"正确","bench.ok":"通过",
+    "mcp.title":"面向 AI Agent 的 MCP 工具","mcp.sub":"让任意 MCP 兼容 Agent 指向 /mcp 端点，即可开箱获得八个工具。",
     "common.format":"格式",
     "label.old":"旧版契约","label.new":"新版契约","label.v1":"版本 1","label.v2":"版本 2","label.v3":"版本 3",
     "btn.run":"检测破坏性变更","btn.running":"分析中…","btn.example":"载入示例",
-    "btn.chain":"运行链式分析","btn.semver":"建议版本升级","btn.migration":"生成迁移方案","btn.sarif":"导出 SARIF","btn.changelog":"生成更新日志",
+    "btn.chain":"运行链式分析","btn.semver":"建议版本升级","btn.migration":"生成迁移方案","btn.sarif":"导出 SARIF","btn.changelog":"生成更新日志","btn.impact":"扫描我的影响","btn.bench":"运行基准",
     "empty.title":"尚未分析","empty.desc":"粘贴两版契约并运行检测，或载入示例查看效果。",
     "breaking":"处破坏性变更","clean":"无破坏性变更","nochanges":"未检测到变更——两份契约等价。",
     "findings":"条变更","copy":"复制 JSON","copied":"已复制！","download":"下载","step":"步骤",
     "bump.major":"MAJOR","bump.minor":"MINOR","bump.patch":"PATCH","bump.reason":"建议升级","bump.versions":"建议版本",
     "migration.empty":"未发现破坏性变更——无需迁移。","migration.total":"条破坏性变更含迁移路径",
     "sarif.download":"下载 SARIF","sarif.note":"SARIF 报告已生成。",
-    "emptyM":{"migration":"未发现破坏性变更——无需迁移。","sarif":"先生成 SARIF 报告。","changelog":"先生成更新日志。","semver":"先运行版本分析。","chain":"先运行链式分析。","diff":"尚未分析。"},
+    "emptyM":{"migration":"未发现破坏性变更——无需迁移。","sarif":"先生成 SARIF 报告。","changelog":"先生成更新日志。","semver":"先运行版本分析。","chain":"先运行链式分析。","diff":"尚未分析。","impact":"先运行影响扫描或基准。"},
     "mcp.t1":"核心 diff — 返回完整检测报告 JSON 字符串",
     "mcp.t1a":"old_spec, new_spec, format, use_llm?",
     "mcp.t2":"即时、免费 — 列出支持的契约格式",
@@ -451,9 +506,12 @@ const I18N={
     "mcp.t4a":"old_spec, new_spec, format, current_version",
     "mcp.t5":"为发布说明生成 markdown 更新日志",
     "mcp.t5a":"old_spec, new_spec, format, old_version, new_version",
-    "mcp.t6":"为破坏性变更生成兼容性迁移建议",
+"mcp.t6":"为破坏性变更生成兼容性迁移建议",
     "mcp.t6a":"old_spec, new_spec, format",
-    "footer":"为 X-Agent MCP Hackathon 2026 构建 · 确定性 diff 引擎 · "
+    "mcp.t7":"消费者感知影响扫描——哪些变更影响你的 path/schema，含传递爆炸半径",
+    "mcp.t7a":"old_spec, new_spec, format, consumer_profile",
+    "mcp.t8":"回放 16 组回归语料库，报告 precision/recall/F1",
+    "mcp.t8a":""
   }
 };
 let lang="en";
@@ -472,7 +530,9 @@ const MCP_TOOLS=[
   {name:"explain_change_type",descKey:"mcp.t3",argsKey:"mcp.t3a"},
   {name:"suggest_version_bump",descKey:"mcp.t4",argsKey:"mcp.t4a"},
   {name:"generate_changelog",descKey:"mcp.t5",argsKey:"mcp.t5a"},
-  {name:"suggest_migration",descKey:"mcp.t6",argsKey:"mcp.t6a"}
+  {name:"suggest_migration",descKey:"mcp.t6",argsKey:"mcp.t6a"},
+  {name:"scan_consumer_impact",descKey:"mcp.t7",argsKey:"mcp.t7a"},
+  {name:"run_benchmark",descKey:"mcp.t8",argsKey:"mcp.t8a"}
 ];
 function renderMcpCards(){
   const grid=document.getElementById("mcp-grid");
@@ -615,7 +675,7 @@ v3:`{
 function fmtFor(panel){const group=document.getElementById("panel-"+panel).querySelector("[data-fmt-group]");return group.querySelector("button.active").dataset.fmt}
 function setExamples(panel,onlyTwo){
   const ex=EXAMPLES[fmtFor(panel)];
-  const ids={diff:["d-old","d-new"],chain:["c-1","c-2","c-3"],semver:["s-old","s-new"],migration:["m-old","m-new"],sarif:["r-old","r-new"],changelog:["g-old","g-new"]};
+  const ids={diff:["d-old","d-new"],chain:["c-1","c-2","c-3"],semver:["s-old","s-new"],migration:["m-old","m-new"],sarif:["r-old","r-new"],changelog:["g-old","g-new"],impact:["i-old","i-new"]};
   const list=ids[panel]||[];
   const vals=[ex.old,ex.new,ex.v3];
   list.forEach((id,i)=>{if(onlyTwo&&i===2)return;document.getElementById(id).value=vals[i]||""});
@@ -643,6 +703,16 @@ document.querySelectorAll("[data-fmt-group]").forEach(group=>{
   });
 });
 document.getElementById("c-example").addEventListener("click",()=>{setExamples("chain",false);document.getElementById("c-result").innerHTML=""});
+document.getElementById("i-example").addEventListener("click",()=>{
+  setExamples("impact",true);
+  const fmt=fmtFor("impact");
+  const prof=fmt==="openapi"?'{"paths": ["/users"], "schemas": ["User"]}'
+    :fmt==="graphql"?'{"schemas": ["User"]}'
+    :'{"fields": ["$.properties.id"]}';
+  document.getElementById("i-profile").value=prof;
+  document.getElementById("i-result").innerHTML="";
+  document.getElementById("b-result").innerHTML="";
+});
 
 function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function renderError(el,msg){el.innerHTML=`<div class="error-state">${escapeHtml(msg)}</div>`}
@@ -797,7 +867,68 @@ document.getElementById("g-run").addEventListener("click",async()=>{
   finally{btn.disabled=false;btn.querySelector(".spinner").style.display="none";btn.querySelector("span:not(.spinner)").textContent=old}
 });
 
-const EMPTY_PANELS={diff:"diff",chain:"chain",semver:"semver",migration:"migration",sarif:"sarif",changelog:"changelog"};
+const EMPTY_PANELS={diff:"diff",chain:"chain",semver:"semver",migration:"migration",sarif:"sarif",changelog:"changelog",impact:"impact"};
+
+document.getElementById("i-run").addEventListener("click",async()=>{
+  const btn=document.getElementById("i-run"),res=document.getElementById("i-result");
+  const oldS=document.getElementById("i-old").value,newS=document.getElementById("i-new").value;
+  if(!oldS.trim()||!newS.trim())return;
+  let profile={};
+  const raw=document.getElementById("i-profile").value.trim();
+  if(raw){try{profile=JSON.parse(raw)}catch(e){renderError(res,lang==="zh"?("消费者画像不是合法 JSON："+e.message):("consumer_profile is not valid JSON: "+e.message));return}}
+  const old=btn.querySelector("span:not(.spinner)").textContent;btn.dataset.label=old;
+  btn.querySelector(".spinner").style.display="inline-block";btn.disabled=true;btn.querySelector("span:not(.spinner)").textContent=t("btn.running");
+  try{
+    const data=await post("/v1/consumer-scan",{old_spec:oldS,new_spec:newS,format:fmtFor("impact"),consumer_profile:profile,use_llm:false});
+    renderImpact(res,data);
+  }catch(e){renderError(res,lang==="zh"?("无法连接服务："+e.message):("Cannot reach the service: "+e.message))}
+  finally{btn.disabled=false;btn.querySelector(".spinner").style.display="none";btn.querySelector("span:not(.spinner)").textContent=old}
+});
+function impactHitHtml(f){
+  const diff=(f.previous||f.current)?`<div class="f-diff">${f.previous?`<span class="prev">${escapeHtml(f.previous)}</span>`:""}<span class="arrow">→</span>${f.current?`<span class="curr">${escapeHtml(f.current)}</span>`:"<span class='curr'>(removed)</span>"}</div>`:"";
+  const sug=f.suggestion?`<div class="f-sug">${escapeHtml(f.suggestion)}</div>`:"";
+  const ops=f.affected_operations&&f.affected_operations.length?`<div class="impact-ops"><b>${t("impact.ops")}:</b> ${f.affected_operations.map(escapeHtml).join(" · ")}</div>`:"";
+  return `<div class="finding" data-break="${f.breaking}">
+    <div class="f-head"><span class="sev" data-s="${f.severity}"></span><span class="ctype">${escapeHtml(f.change_type)}</span><span class="src ${f.source||"confirmed"}">${f.source||"confirmed"}</span></div>
+    <div class="f-loc">${escapeHtml(f.location)}</div>
+    <div class="f-sum">${escapeHtml(f.summary)}</div>
+    ${diff}${sug}${ops}
+  </div>`;
+}
+function renderImpact(res,data){
+  const isBad=data.consumer_aware?data.consumer_affected:data.breaking;
+  const status=data.consumer_aware
+    ? (data.consumer_affected?`<div class="break-status bad"><span class="bdot"></span>${data.consumer_breaking_count} ${t("breaking")} ${t("impact.affected")}</div>`:`<div class="break-status good"><span class="bdot"></span>${t("impact.clean")}</div>`)
+    : (data.breaking?`<div class="break-status bad"><span class="bdot"></span>${data.breaking_count} ${t("breaking")}</div>`:`<div class="break-status good"><span class="bdot"></span>${t("clean")}</div>`);
+  const chips=`<span class="count-chip" data-s="critical">${data.hit_count} ${t("impact.hits")}</span><span class="count-chip" data-s="minor">${data.miss_count} ${t("impact.misses")}</span>`;
+  const ops=data.impact&&data.impact.affected_operations&&data.impact.affected_operations.length?`<div class="impact-ops"><b>${t("impact.ops")}:</b> ${data.impact.affected_operations.map(escapeHtml).join(" · ")}</div>`:"";
+  const copy=`<div class="copy-row"><button data-copy='${escapeHtml(JSON.stringify(data))}'></button></div>`;
+  const hits=(data.hits||[]).map(impactHitHtml).join("");
+  const missHtml=(data.misses||[]).map(f=>`<div class="finding" data-break="false" style="opacity:.55"><div class="f-head"><span class="sev" data-s="info"></span><span class="ctype">${escapeHtml(f.change_type)}</span><span class="src confirmed">ignored</span></div><div class="f-loc">${escapeHtml(f.location)}</div><div class="f-sum">${escapeHtml(f.summary)}</div></div>`).join("");
+  let html=`<div class="summary-card ${isBad?"breaking":"clean"}">${status}<div class="counts">${chips}</div>${copy}<div class="summary-text">${escapeHtml(data.summary)}</div>${ops}</div>`;
+  html+=`<div class="findings"><div class="impact-group">${hits||`<div class="empty-state"><div class="icon">✓</div><h3>${t("impact.noHits")}</h3></div>`}</div></div>`;
+  if(missHtml)html+=`<details class="misses"><summary>${t("impact.missesTitle")} (${data.miss_count})</summary><div class="findings">${missHtml}</div></details>`;
+  res.innerHTML=html;
+  const cb=res.querySelector("[data-copy]");if(cb)cb.textContent=t("copy");
+}
+
+document.getElementById("b-run").addEventListener("click",async()=>{
+  const btn=document.getElementById("b-run"),res=document.getElementById("b-result");
+  const old=btn.querySelector("span:not(.spinner)").textContent;btn.dataset.label=old;
+  btn.querySelector(".spinner").style.display="inline-block";btn.disabled=true;btn.querySelector("span:not(.spinner)").textContent=t("btn.running");
+  try{
+    const resp=await fetch("/v1/benchmark");const data=await resp.json();
+    renderBench(res,data);
+  }catch(e){renderError(res,lang==="zh"?("无法连接服务："+e.message):("Cannot reach the service: "+e.message))}
+  finally{btn.disabled=false;btn.querySelector(".spinner").style.display="none";btn.querySelector("span:not(.spinner)").textContent=old}
+});
+function renderBench(res,data){
+  const score=[["accuracy",data.accuracy],["precision",data.precision],["recall",data.recall],["F1",data.f1]];
+  const cards=score.map(([k,v])=>`<div class="stat" style="min-width:110px"><b data-c="${v>=0.99?"minor":"major"}">${v}</b><span>${k}</span></div>`).join("");
+  const rows=data.results.map(r=>`<tr><td>${escapeHtml(r.name)}</td><td>${r.format}</td><td class="${r.correct?"ok":"err"}">${r.correct?"✓":"✗"}</td></tr>`).join("");
+  res.innerHTML=`<div class="bench-card"><div class="panel-head"><h2>${t("bench.title")}</h2><p>${t("bench.sub")} — ${data.total_samples} ${t("bench.samples")}, ${data.correct}/${data.total_samples} ${t("bench.correct")}</p></div><div class="hero-stats" style="margin:14px 0">${cards}</div><div class="conf">TP ${data.confusion.tp} · FP ${data.confusion.fp} · FN ${data.confusion.fn} · TN ${data.confusion.tn}</div><table class="bench-table"><thead><tr><th>sample</th><th>format</th><th>${t("bench.ok")}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
 document.querySelectorAll(".panel").forEach(p=>{if(p.id!=="panel-mcp"){const key=p.id.replace("panel-","");p.querySelector(".result").innerHTML=`<div class="empty-state"><div class="icon">◆</div><h3>${t("empty.title")}</h3><p>${t("empty.desc")}</p></div>`}});
 applyI18n();
 </script>

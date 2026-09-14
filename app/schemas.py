@@ -104,3 +104,19 @@ class MigrationResponse(BaseModel):
     total_breaking: int
     has_migration_path: bool
     suggestions: list[MigrationSuggestionResponse]
+
+
+class ConsumerScanRequest(BaseModel):
+    old_spec: str = Field(..., description="Previous contract (OpenAPI/GraphQL SDL/JSON Schema text)")
+    new_spec: str = Field(..., description="New contract text to compare against old_spec")
+    format: str = Field("openapi", description="openapi | graphql | json-schema")
+    consumer_profile: dict | None = Field(
+        None,
+        description=(
+            "Which parts of the API this consumer actually uses. Keys: "
+            "paths (list of OpenAPI path templates), schemas (list of "
+            "component/schema or GraphQL type names), fields (list of "
+            "exact location prefixes). Omit for full (non-filtered) impact."
+        ),
+    )
+    use_llm: bool = Field(False, description="Append LLM impact assessment (advisory)")
