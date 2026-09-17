@@ -206,7 +206,7 @@ footer a:hover{color:var(--blue-deep);text-decoration:underline}
   <div class="logo"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;vertical-align:middle"><path d="M6 3h12l4 6-10 13L2 9Z"/></svg></span> Contract Guard</div>
   <nav>
     <a href="/docs">API</a>
-    <a href="/v1/formats">Formats</a>
+    <a href="/redoc">Formats</a>
     <button id="lang-toggle" type="button">中文</button>
     <a href="https://github.com/kestarsheng/contract-guard" target="_blank" rel="noopener">GitHub <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;vertical-align:middle"><path d="M7 17L17 7M7 7H17V17"/></svg></a>
   </nav>
@@ -227,7 +227,7 @@ footer a:hover{color:var(--blue-deep);text-decoration:underline}
       </div>
       <div class="hero-actions">
         <a class="btn-primary" href="#workbench" data-i18n="hero.cta">Open the diff bench</a>
-        <a class="btn-ghost" href="/v1" data-i18n="hero.cta2">Explore the API</a>
+        <a class="btn-ghost" href="/docs" data-i18n="hero.cta2">Explore the API</a>
       </div>
       <div class="badges">
         <span class="badge"><span class="dot"></span><span data-i18n="badge.det">Deterministic</span></span>
@@ -517,7 +517,7 @@ const I18N={
     "migration.title":"兼容性迁移建议","migration.sub":"为每一条破坏性变更生成逐步迁移建议。",
     "sarif.title":"SARIF 2.1.0 导出","sarif.sub":"将 diff 结果导出为 SARIF，可直接接入 GitHub Code Scanning 等静态分析工具。",
     "changelog.title":"发布更新日志","changelog.sub":"直接根据契约变更生成 markdown 发布说明。",
-    "impact.title":"消费者感知影响扫描","impact.sub":"哪条变更真正影响你的 Agent 使用的 path / schema / 字段？传统 diff 工具回答"它对所有人是否破坏性"——这里回答"它对我是否破坏性"。",
+    "impact.title":"消费者感知影响扫描","impact.sub":"哪条变更真正影响你的 Agent 使用的 path / schema / 字段？传统 diff 工具回答\u201c它对所有人是否破坏性\u201d——这里回答\u201c它对我是否破坏性\u201d。",
     "impact.profileL":"消费者画像（JSON）","impact.profileHint":"你使用的内容",
     "impact.affected":"影响你","impact.clean":"无变更命中你的消费者子集","impact.hits":"命中","impact.misses":"可忽略","impact.ops":"受影响操作","impact.noHits":"无变更命中你的消费者子集","impact.missesTitle":"可忽略的变更（不在你的子集内）",
     "bench.title":"回归基准","bench.sub":"16 组带标注样本回放确定性引擎","bench.samples":"组样本","bench.correct":"正确","bench.ok":"通过",
