@@ -193,7 +193,7 @@ footer a{color:var(--dim)}
 footer a:hover{color:var(--text)}
 :root{
   --paper:#f1eee5;--paper-2:#eae6d9;--sheet:#fbfaf5;--sheet-2:#f5f2e9;--sheet-hi:#ffffff;
-  --ink:#27292c;--ink-2:#5a5e63;--ink-3:#8d9095;
+  --ink:#1f2123;--ink-2:#3f4347;--ink-3:#666a70;
   --line:#d9d3c4;--line-2:#c3bbaa;
   --gridline:rgba(46,49,54,.045);
   --blue:#2a5599;--blue-deep:#1f4178;--blue-pale:#edf2fa;
@@ -233,7 +233,7 @@ nav a:hover,nav button:hover{color:var(--ink);text-decoration:underline;text-dec
 .hero-stats .stat b[data-c="brand"]{color:var(--red)}
 .hero-stats .stat b[data-c="minor"]{color:var(--blue)}
 .hero-stats .stat b[data-c="major"]{color:var(--amber)}
-.hero-stats .stat span{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+.hero-stats .stat span{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2)}
 .hero-actions{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap}
 .badges{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
 .badge{padding:3px 9px;border-radius:var(--r);font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);background:var(--sheet)}
@@ -255,7 +255,7 @@ nav a:hover,nav button:hover{color:var(--ink);text-decoration:underline;text-dec
 .fig-row.chg .sig{color:var(--amber)}
 .fig-row.add{background:var(--blue-pale);color:var(--blue-deep)}
 .fig-row.add .sig{color:var(--blue)}
-.fig-row .loc{opacity:.75}
+.fig-row .loc{opacity:1}
 .fig-note{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);display:flex;align-items:center;gap:9px}
 .fig-note .stamp{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--red);padding:3px 8px;border-radius:var(--r);font-weight:600}
 .fig-note .txt{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
@@ -366,7 +366,7 @@ textarea::placeholder{color:var(--ink-3)}
 .bench-table td.ok{color:var(--green)}
 .bench-table td.err{color:var(--red)}
 .conf{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
-footer{background:var(--sheet);color:var(--ink-3)}
+footer{background:var(--sheet);color:var(--ink-2)}
 footer a{color:var(--blue)}
 footer a:hover{color:var(--blue-deep);text-decoration:underline}
 @media(max-width:760px){.contract-grid{grid-template-columns:1fr}}
@@ -1115,7 +1115,7 @@ function renderImpact(res,data){
   const ops=data.impact&&data.impact.affected_operations&&data.impact.affected_operations.length?`<div class="impact-ops"><b>${t("impact.ops")}:</b> ${data.impact.affected_operations.map(escapeHtml).join(" · ")}</div>`:"";
   const copy=`<div class="copy-row"><button data-copy='${escapeHtml(JSON.stringify(data))}'></button></div>`;
   const hits=(data.hits||[]).map(impactHitHtml).join("");
-  const missHtml=(data.misses||[]).map(f=>`<div class="finding" data-break="false" style="opacity:.55"><div class="f-head"><span class="sev" data-s="info"></span><span class="ctype">${escapeHtml(f.change_type)}</span><span class="src confirmed">ignored</span></div><div class="f-loc">${escapeHtml(f.location)}</div><div class="f-sum">${escapeHtml(f.summary)}</div></div>`).join("");
+  const missHtml=(data.misses||[]).map(f=>`<div class="finding" data-break="false" style="opacity:.72"><div class="f-head"><span class="sev" data-s="info"></span><span class="ctype">${escapeHtml(f.change_type)}</span><span class="src confirmed">ignored</span></div><div class="f-loc">${escapeHtml(f.location)}</div><div class="f-sum">${escapeHtml(f.summary)}</div></div>`).join("");
   let html=`<div class="summary-card ${isBad?"breaking":"clean"}">${status}<div class="counts">${chips}</div>${copy}<div class="summary-text">${escapeHtml(data.summary)}</div>${ops}</div>`;
   html+=`<div class="findings"><div class="impact-group">${hits||`<div class="empty-state"><div class="icon">${icon("check")}</div><h3>${t("impact.noHits")}</h3></div>`}</div></div>`;
   if(missHtml)html+=`<details class="misses"><summary>${t("impact.missesTitle")} (${data.miss_count})</summary><div class="findings">${missHtml}</div></details>`;
