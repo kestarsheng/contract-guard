@@ -191,7 +191,189 @@ textarea::placeholder{color:var(--faint)}
 footer{padding:24px 32px;border-top:1px solid var(--border);color:var(--faint);font-size:12.5px;text-align:center}
 footer a{color:var(--dim)}
 footer a:hover{color:var(--text)}
+:root{
+  --paper:#f1eee5;--paper-2:#eae6d9;--sheet:#fbfaf5;--sheet-2:#f5f2e9;--sheet-hi:#ffffff;
+  --ink:#27292c;--ink-2:#5a5e63;--ink-3:#8d9095;
+  --line:#d9d3c4;--line-2:#c3bbaa;
+  --gridline:rgba(46,49,54,.045);
+  --blue:#2a5599;--blue-deep:#1f4178;--blue-pale:#edf2fa;
+  --red:#b0392b;--red-deep:#8c2a1e;--red-pale:#f7e9e5;
+  --amber:#8a5a1d;--amber-pale:#f6efdd;
+  --green:#33753f;--green-pale:#e9f2ea;
+  --tag:#f0e2b0;
+  --mono:"IBM Plex Mono","JetBrains Mono",ui-monospace,Consolas,"SFMono-Regular",monospace;
+  --sans:"IBM Plex Sans","Inter","Segoe UI",-apple-system,system-ui,sans-serif;
+  --serif:"IBM Plex Serif",Georgia,"Songti SC","Noto Serif SC",serif;
+  --r:3px;
+  --shadow:0 1px 2px rgba(50,53,48,.06),0 1px 0 rgba(255,255,255,.6) inset;
+}
+body{background-color:var(--paper);background-image:linear-gradient(var(--gridline) 1px,transparent 1px),linear-gradient(90deg,var(--gridline) 1px,transparent 1px);background-size:26px 26px}
+::selection{background:rgba(176,57,43,.18)}
+header{position:sticky;top:0;z-index:60;height:56px;padding:0 28px;background:rgba(251,250,245,.94);backdrop-filter:blur(8px)}
+.logo{font-family:var(--serif);font-weight:600;font-size:16px;letter-spacing:-.01em}
+.logo .mark{width:24px;height:24px;border-radius:var(--r);background:var(--ink);color:var(--paper);font-size:13px}
+nav{gap:22px}
+nav a,nav button{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);padding:0}
+nav a:hover,nav button:hover{color:var(--ink);text-decoration:underline;text-decoration-color:var(--red);text-underline-offset:4px}
+#lang-toggle{font-family:var(--sans);text-transform:none;letter-spacing:0;font-size:12px;padding:4px 10px;border:1px solid var(--line-2);border-radius:var(--r)}
+#lang-toggle:hover{background:var(--sheet-2);text-decoration:none}
+.hero{max-width:1180px;margin:0 auto;padding:56px 32px 38px;width:100%}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:44px;align-items:center}
+@media(max-width:880px){.hero-grid{grid-template-columns:1fr;gap:28px}}
+.eyebrow{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin-bottom:18px}
+.eyebrow::before{content:"";width:26px;height:2px;background:var(--red)}
+.hero h1{font-family:var(--serif);font-size:clamp(30px,4.2vw,47px);font-weight:600;line-height:1.1;letter-spacing:-.015em;color:var(--ink)}
+.hero h1 em{font-style:normal;color:var(--red-deep);background:rgba(176,57,43,.09);box-shadow:inset 0 -3px 0 rgba(176,57,43,.28);padding:0 3px}
+.lede{margin:18px 0 0;max-width:540px;color:var(--ink-2);font-size:15.5px;line-height:1.72}
+.hero-stats{display:flex;flex-wrap:wrap;margin-top:30px}
+.hero-stats .stat{display:flex;align-items:baseline;gap:8px;padding:0 18px;margin:0}
+.hero-stats .stat:first-child{padding-left:0}
+.hero-stats .stat:not(:first-child){border-left:1px solid var(--line)}
+.hero-stats .stat b{font-family:var(--serif);font-size:23px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+.hero-stats .stat b[data-c="brand"]{color:var(--red)}
+.hero-stats .stat b[data-c="minor"]{color:var(--blue)}
+.hero-stats .stat b[data-c="major"]{color:var(--amber)}
+.hero-stats .stat span{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+.hero-actions{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap}
+.badges{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.badge{padding:3px 9px;border-radius:var(--r);font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);background:var(--sheet)}
+.badge .dot{width:5px;height:5px;border-radius:1px;background:var(--red)}
+.badge.b2 .dot{background:var(--blue)}
+.badge.b3 .dot{background:var(--green)}
+.hero-art{position:relative}
+.fig{background:var(--sheet);border:1px solid var(--line-2);border-top:3px solid var(--ink);border-radius:var(--r);box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 18px 36px -24px rgba(46,50,55,.55);padding:15px 16px 12px}
+.fig-head{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:10px;gap:10px}
+.fig-title{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.fig-vers{font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
+.fig-vers b{color:var(--ink)}
+.fig-row{display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:baseline;padding:7px 8px;border-radius:var(--r);font-family:var(--mono);font-size:12px;line-height:1.5}
+.fig-row .sig{font-weight:600;text-align:center}
+.fig-row.del{background:var(--red-pale);color:var(--red-deep)}
+.fig-row.del .sig{color:var(--red)}
+.fig-row.del .val{text-decoration:line-through;text-decoration-color:rgba(140,42,30,.55)}
+.fig-row.chg{background:var(--amber-pale);color:#6a4a14}
+.fig-row.chg .sig{color:var(--amber)}
+.fig-row.add{background:var(--blue-pale);color:var(--blue-deep)}
+.fig-row.add .sig{color:var(--blue)}
+.fig-row .loc{opacity:.75}
+.fig-note{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);display:flex;align-items:center;gap:9px}
+.fig-note .stamp{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--red);padding:3px 8px;border-radius:var(--r);font-weight:600}
+.fig-note .txt{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.fig-tag{position:absolute;top:-11px;right:-6px;background:var(--tag);border:1px solid var(--line-2);color:#6a4a14;font-family:var(--mono);font-size:10.5px;padding:4px 9px;transform:rotate(2.5deg);box-shadow:0 10px 20px -14px rgba(46,50,55,.6)}
+.workbench{max-width:1180px;margin:0 auto;padding:10px 32px 56px;width:100%;flex:1}
+#workbench{scroll-margin-top:64px}
+.main-tabs{display:flex;flex-wrap:wrap;gap:2px;border-bottom:2px solid var(--ink);margin-bottom:22px;padding:0;background:none;border-radius:0;width:auto}
+.main-tabs button{padding:11px 15px 9px;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;background:none;color:var(--ink-2);font-size:13px;font-weight:500;border-radius:0;gap:8px}
+.main-tabs button .idx{font-size:10px;padding:0;border:none;color:var(--ink-3)}
+.main-tabs button.active{background:none;color:var(--ink);box-shadow:none;border-bottom-color:var(--red)}
+.main-tabs button.active .idx{color:var(--red);border:none}
+.main-tabs button:hover:not(.active){color:var(--ink)}
+@media(max-width:760px){.main-tabs button{padding:10px 11px 8px;font-size:12.5px}}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.panel-head h2{font-family:var(--serif);font-size:21px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+.panel-head p{color:var(--ink-2);font-size:13.5px}
+.format-row .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.pill-group{border:1px solid var(--line-2);border-radius:var(--r);background:var(--sheet);overflow:hidden;padding:0}
+.pill-group button{padding:7px 14px;border-right:1px solid var(--line);background:none;color:var(--ink-2);font-size:12.5px;border-radius:0}
+.pill-group button:last-child{border-right:none}
+.pill-group button.active{background:var(--blue);color:#fff}
+.pill-group button:hover:not(.active){background:var(--sheet-2);color:var(--ink)}
+.contract-cell label{font-size:13px;color:var(--ink-2);font-weight:600}
+.contract-cell label .ver{padding:1px 7px;border-radius:var(--r);font-size:10.5px;background:var(--sheet-2);color:var(--ink-3)}
+.contract-cell label .ver.v1{color:var(--blue);border-color:rgba(42,85,153,.4)}
+.contract-cell label .ver.v2{color:var(--red);border-color:rgba(176,57,43,.4)}
+textarea{height:220px;background:#fff;border-color:var(--line-2);color:var(--ink);font-size:12.5px;line-height:1.6;padding:14px;border-radius:var(--r);box-shadow:none}
+textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(42,85,153,.13)}
+textarea::placeholder{color:var(--ink-3)}
+.btn-primary{padding:11px 20px;background:var(--blue);border:1px solid var(--blue-deep);border-radius:var(--r);color:#fff;font-size:13.5px;font-weight:600;box-shadow:none}
+.btn-primary:hover{background:var(--blue-deep);box-shadow:0 7px 16px -9px rgba(31,65,120,.65)}
+.btn-primary:active{transform:translateY(1px)}
+.btn-primary:disabled{opacity:.6;cursor:wait}
+.btn-ghost{padding:11px 16px;background:var(--sheet);border:1px solid var(--line-2);border-radius:var(--r);color:var(--ink-2);font-size:13px;font-weight:500}
+.btn-ghost:hover{color:var(--ink);border-color:var(--ink-3);background:var(--sheet-hi)}
+.spinner{width:13px;height:13px;border:2px solid currentColor;opacity:.32;border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.summary-card{padding:16px 20px;background:var(--sheet);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:0 var(--r) var(--r) 0;box-shadow:var(--shadow);margin-bottom:16px}
+.summary-card.breaking{border-left-color:var(--red);background:linear-gradient(90deg,var(--red-pale),var(--sheet) 45%)}
+.summary-card.clean{border-left-color:var(--green)}
+.break-status{font-size:14px;font-weight:600;color:var(--ink)}
+.break-status .bdot{width:9px;height:9px;border-radius:1px}
+.break-status.bad .bdot{background:var(--red)}
+.break-status.good .bdot{background:var(--green)}
+.count-chip{padding:2px 9px;border-radius:var(--r);font-family:var(--mono);font-size:11.5px;background:var(--sheet-2);color:var(--ink-2)}
+.count-chip[data-s="critical"]{color:var(--red-deep);border-color:rgba(176,57,43,.4);background:var(--red-pale)}
+.count-chip[data-s="major"]{color:var(--amber);border-color:rgba(138,90,29,.4);background:var(--amber-pale)}
+.count-chip[data-s="minor"]{color:var(--blue);border-color:rgba(42,85,153,.4);background:var(--blue-pale)}
+.count-chip[data-s="info"]{color:var(--ink-3);border-color:var(--line)}
+.summary-text{color:var(--ink-2);font-size:13.5px;flex-basis:100%;margin-top:2px}
+.copy-row button{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:var(--r);border:1px solid var(--line-2);background:var(--sheet);color:var(--ink-3)}
+.copy-row button:hover{color:var(--ink);border-color:var(--ink-3);background:var(--sheet-hi)}
+.finding{padding:13px 16px 13px 18px;background:var(--sheet);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.finding:hover{border-color:var(--line-2);box-shadow:0 12px 26px -22px rgba(46,50,55,.5)}
+.finding[data-break="true"]{border-left:3px solid var(--red)}
+.finding[data-break="false"]{border-left:3px solid var(--blue)}
+.f-head .sev{width:7px;height:7px;border-radius:1px}
+.f-head .sev[data-s="critical"]{background:var(--red)}
+.f-head .sev[data-s="major"]{background:var(--amber)}
+.f-head .sev[data-s="minor"]{background:var(--blue)}
+.f-head .sev[data-s="info"]{background:var(--ink-3)}
+.f-head .ctype{font-family:var(--mono);font-size:12px;background:var(--sheet-2);border:1px solid var(--line);padding:1px 7px;border-radius:var(--r)}
+.f-head .src{font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-family:var(--mono);padding:2px 8px;border-radius:var(--r);border:1px solid transparent}
+.f-head .src.confirmed{color:var(--blue);background:var(--blue-pale);border-color:rgba(42,85,153,.3)}
+.f-head .src.advisory{color:var(--amber);background:var(--amber-pale);border-color:rgba(138,90,29,.3)}
+.f-loc{font-family:var(--mono);font-size:12px;color:var(--ink-3);margin-top:8px}
+.f-sum{font-size:14px;color:var(--ink);margin-top:3px;line-height:1.6}
+.f-diff{font-family:var(--mono);font-size:12px;color:var(--ink-2);margin-top:10px}
+.f-diff .prev{color:var(--red-deep);text-decoration-color:rgba(176,57,43,.5)}
+.f-diff .curr{color:var(--blue);font-weight:600}
+.f-diff .arrow{color:var(--ink-3)}
+.f-sug{margin-top:10px;font-size:12.5px;color:var(--ink-2);padding:8px 12px;background:var(--sheet-2);border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:var(--r);line-height:1.6}
+.mig-card{padding:14px 18px;background:var(--sheet);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:var(--r);box-shadow:var(--shadow)}
+.mig-card .mig-head .sev{width:7px;height:7px;border-radius:1px}
+.mig-card .mig-head .sev[data-s="critical"]{background:var(--red)}
+.mig-card .mig-head .sev[data-s="major"]{background:var(--amber)}
+.mig-card .mig-head .sev[data-s="minor"]{background:var(--blue)}
+.semver-card{padding:20px 24px;background:var(--sheet);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:0 var(--r) var(--r) 0;box-shadow:var(--shadow)}
+.semver-card .bump-badge{font-family:var(--serif);font-size:29px;font-weight:600;letter-spacing:-.01em;padding:12px 20px;border-radius:var(--r)}
+.semver-card .bump-badge.major{color:var(--red-deep);background:var(--red-pale);border:2px solid rgba(176,57,43,.5)}
+.semver-card .bump-badge.minor{color:var(--blue);background:var(--blue-pale);border:2px solid rgba(42,85,153,.5)}
+.semver-card .bump-badge.patch{color:var(--green);background:var(--green-pale);border:2px solid rgba(51,117,63,.5)}
+.semver-card .semver-versions{font-family:var(--mono);font-size:14px}
+.semver-card .semver-versions .new{color:var(--blue);font-weight:700}
+.semver-card .semver-versions .old{color:var(--ink-3)}
+.semver-card .semver-versions .arrow{color:var(--ink-3)}
+.changelog-box{background:#fff;border:1px solid var(--line);border-radius:var(--r);color:var(--ink);font-size:12.5px;line-height:1.7}
+.sarif-box pre{background:var(--sheet);border:1px solid var(--line);border-radius:var(--r);color:var(--blue-deep);font-size:11.5px;line-height:1.5}
+.copy-btn-top{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:var(--r);border:1px solid var(--line-2);background:var(--sheet);color:var(--ink-3)}
+.copy-btn-top:hover{color:var(--ink);border-color:var(--ink-3);background:var(--sheet-hi)}
+.empty-state{padding:46px 24px;border:1px dashed var(--line-2);border-radius:var(--r);background:var(--sheet)}
+.empty-state .icon{font-size:26px;opacity:.6}
+.empty-state h3{color:var(--ink-2);font-size:15px;margin-bottom:6px;font-weight:600}
+.empty-state p{font-size:13px;color:var(--ink-3)}
+.error-state{padding:16px 20px;background:var(--red-pale);border:1px solid rgba(176,57,43,.35);border-left:3px solid var(--red);border-radius:0 var(--r) var(--r) 0;color:var(--red-deep);font-size:13.5px}
+.mcp-card{padding:16px 18px;background:var(--sheet);border:1px solid var(--line);border-top:3px solid var(--blue);border-radius:var(--r);box-shadow:var(--shadow)}
+.mcp-card:hover{border-color:var(--line-2);transform:translateY(-2px)}
+.mcp-card .mcp-name{font-family:var(--mono);font-size:13px;color:var(--blue);font-weight:600;word-break:break-all}
+.mcp-card .mcp-desc{font-size:13px;color:var(--ink-2);line-height:1.55}
+.mcp-card .mcp-args{font-family:var(--mono);font-size:11px;color:var(--ink-3);border-top:1px solid var(--line)}
+.impact-ops{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.misses{border:1px solid var(--line);border-radius:var(--r);background:var(--sheet)}
+.misses summary{font-size:13px;color:var(--ink-2);font-weight:600}
+.bench-card{border:1px solid var(--line);border-radius:var(--r);background:var(--sheet);box-shadow:var(--shadow)}
+.bench-table{font-family:var(--mono);font-size:12px}
+.bench-table th,.bench-table td{border-bottom:1px solid var(--line)}
+.bench-table th{color:var(--ink-3);font-weight:600;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase}
+.bench-table td.ok{color:var(--green)}
+.bench-table td.err{color:var(--red)}
+.conf{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+footer{background:var(--sheet);color:var(--ink-3)}
+footer a{color:var(--blue)}
+footer a:hover{color:var(--blue-deep);text-decoration:underline}
+@media(max-width:760px){.contract-grid{grid-template-columns:1fr}}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 <header>
@@ -205,23 +387,45 @@ footer a:hover{color:var(--text)}
 </header>
 
 <section class="hero">
-  <h1 data-i18n="hero.h1">Catch API breaking changes before they ship</h1>
-  <p data-i18n="hero.p">A deterministic compatibility checker built for AI agents. Compare two OpenAPI, GraphQL, or JSON Schema contracts and get structured, reproducible findings — the core diff runs without any LLM.</p>
-  <div class="hero-stats">
-    <div class="stat"><b data-c="brand" data-i18n-dyn="stat.rules">35+</b><span data-i18n="stat.rulesL">detection rules</span></div>
-    <div class="stat"><b data-c="minor" data-i18n-dyn="stat.formats">3</b><span data-i18n="stat.formatsL">contract formats</span></div>
-    <div class="stat"><b data-c="major" data-i18n-dyn="stat.tools">8</b><span data-i18n="stat.toolsL">MCP tools</span></div>
-    <div class="stat"><b data-c="brand" data-i18n-dyn="stat.endpoints">8</b><span data-i18n="stat.endpointsL">REST endpoints</span></div>
-    <div class="stat"><b data-c="minor" data-i18n-dyn="stat.f1">1.0</b><span data-i18n="stat.f1L">benchmark F1</span></div>
-  </div>
-  <div class="badges">
-    <span class="badge"><span class="dot"></span><span data-i18n="badge.det">Deterministic</span></span>
-    <span class="badge b2"><span class="dot"></span><span data-i18n="badge.mcp">MCP-ready</span></span>
-    <span class="badge b3"><span class="dot"></span><span data-i18n="badge.rep">100% reproducible</span></span>
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow" data-i18n="hero.eyebrow">Deterministic contract compatibility · zero LLM in the hot path</p>
+      <h1><span data-i18n="hero.a">Know which consumers</span> <em data-i18n="hero.b">break</em> <span data-i18n="hero.c">before you merge</span></h1>
+      <p class="lede" data-i18n="hero.p">Contract Guard diffs two OpenAPI, GraphQL, or JSON Schema contracts and tells you what a human reviewer would: what breaks, how bad, which consumers are hit, what to bump, and how to migrate. Your CI can call it, your agents can call it, you can call it.</p>
+      <div class="hero-stats">
+        <div class="stat"><b data-c="brand" data-i18n-dyn="stat.rules">35+</b><span data-i18n="stat.rulesL">detection rules</span></div>
+        <div class="stat"><b data-c="minor" data-i18n-dyn="stat.formats">3</b><span data-i18n="stat.formatsL">contract formats</span></div>
+        <div class="stat"><b data-c="major" data-i18n-dyn="stat.tools">8</b><span data-i18n="stat.toolsL">MCP tools</span></div>
+        <div class="stat"><b data-c="brand" data-i18n-dyn="stat.endpoints">8</b><span data-i18n="stat.endpointsL">REST endpoints</span></div>
+        <div class="stat"><b data-c="minor" data-i18n-dyn="stat.f1">1.0</b><span data-i18n="stat.f1L">benchmark F1</span></div>
+      </div>
+      <div class="hero-actions">
+        <a class="btn-primary" href="#workbench" data-i18n="hero.cta">Open the diff bench</a>
+        <a class="btn-ghost" href="/v1" data-i18n="hero.cta2">Explore the API</a>
+      </div>
+      <div class="badges">
+        <span class="badge"><span class="dot"></span><span data-i18n="badge.det">Deterministic</span></span>
+        <span class="badge b2"><span class="dot"></span><span data-i18n="badge.mcp">MCP-ready</span></span>
+        <span class="badge b3"><span class="dot"></span><span data-i18n="badge.rep">100% reproducible</span></span>
+      </div>
+    </div>
+    <aside class="hero-art">
+      <span class="fig-tag" data-i18n="hero.tag">2 consumers affected</span>
+      <div class="fig">
+        <div class="fig-head">
+          <span class="fig-title" data-i18n="hero.fig">fig.01 — users API</span>
+          <span class="fig-vers">v1.4.0 <b>→</b> v2.0.0</span>
+        </div>
+        <div class="fig-row del"><span class="sig">−</span><span class="loc">GET /users · param</span><span class="val">page now required</span></div>
+        <div class="fig-row chg"><span class="sig">±</span><span class="loc">User.email</span><span class="val">string → integer</span></div>
+        <div class="fig-row add"><span class="sig">+</span><span class="loc">GET /users/{id}</span><span class="val">new operation added</span></div>
+        <div class="fig-note"><span class="stamp">breaking</span><span class="txt">removed required field · suggests MAJOR</span></div>
+      </div>
+    </aside>
   </div>
 </section>
 
-<section class="workbench">
+<section class="workbench" id="workbench">
   <div class="main-tabs" role="tablist">
     <button data-tab="diff" class="active"><span class="idx">01</span><span data-i18n="tab.diff">Breaking diff</span></button>
     <button data-tab="chain"><span class="idx">02</span><span data-i18n="tab.chain">Chain diff</span></button>
@@ -425,8 +629,11 @@ footer a:hover{color:var(--text)}
 function icon(n){const P={diamond:'<path d="M6 3h12l4 6-10 13L2 9Z"/>',check:'<path d="M20 6 9 17l-5-5"/>',x:'<path d="M18 6L6 18M6 6L18 18"/>','arrow-right':'<path d="M5 12H19M12 5L19 12L12 19"/>','arrow-up-right':'<path d="M7 17L17 7M7 7H17V17"/>'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;vertical-align:middle">${P[n]||''}</svg>`}
 const I18N={
   en:{
-    "hero.h1":"Catch API breaking changes before they ship",
-    "hero.p":"A deterministic compatibility checker built for AI agents. Compare two OpenAPI, GraphQL, or JSON Schema contracts and get structured, reproducible findings — the core diff runs without any LLM.",
+    "hero.eyebrow":"Deterministic contract compatibility · zero LLM in the hot path",
+    "hero.a":"Know which consumers","hero.b":"break","hero.c":"before you merge",
+    "hero.p":"Contract Guard diffs two OpenAPI, GraphQL, or JSON Schema contracts and tells you what a human reviewer would: what breaks, how bad, which consumers are hit, what to bump, and how to migrate. Your CI can call it, your agents can call it, you can call it.",
+    "hero.cta":"Open the diff bench","hero.cta2":"Explore the API",
+    "hero.fig":"fig.01 — users API","hero.tag":"2 consumers affected",
     "stat.rules":"35+","stat.rulesL":"detection rules","stat.formats":"3","stat.formatsL":"contract formats","stat.tools":"8","stat.toolsL":"MCP tools","stat.endpoints":"8","stat.endpointsL":"REST endpoints","stat.f1":"1.0","stat.f1L":"benchmark F1",
     "badge.det":"Deterministic","badge.mcp":"MCP-ready","badge.rep":"100% reproducible",
     "tab.diff":"Breaking diff","tab.chain":"Chain diff","tab.semver":"SemVer","tab.migration":"Migration","tab.sarif":"SARIF","tab.changelog":"Changelog","tab.impact":"Impact scan","tab.mcp":"MCP tools",
@@ -470,8 +677,11 @@ const I18N={
     "mcp.t8a":""
   },
   zh:{
-    "hero.h1":"在发布前拦截 API 破坏性变更",
-    "hero.p":"面向 AI Agent 的确定性兼容性检查器。对比两份 OpenAPI、GraphQL 或 JSON Schema 契约，返回结构化、可复现的结果——核心检测无需任何 LLM。",
+    "hero.eyebrow":"确定性契约兼容性 · 热路径零 LLM",
+    "hero.a":"发布之前，先弄清","hero.b":"谁会坏","hero.c":"",
+    "hero.p":"Contract Guard 对比两份 OpenAPI、GraphQL 或 JSON Schema 契约，给出人类评审才会说的结论：什么坏了、有多严重、伤到了谁、版本该升几级、迁移怎么走。CI 能调它，Agent 能调它，你也能直接调它。",
+    "hero.cta":"打开对比工作台","hero.cta2":"浏览 API",
+    "hero.fig":"图 01 — users API","hero.tag":"影响 2 个消费者",
     "stat.rules":"35+","stat.rulesL":"条检测规则","stat.formats":"3","stat.formatsL":"种契约格式","stat.tools":"8","stat.toolsL":"个 MCP 工具","stat.endpoints":"8","stat.endpointsL":"个 REST 端点","stat.f1":"1.0","stat.f1L":"基准 F1",
     "badge.det":"确定性","badge.mcp":"可 Agent 化","badge.rep":"100% 可复现",
     "tab.diff":"破坏性 diff","tab.chain":"链式 diff","tab.semver":"语义化版本","tab.migration":"迁移建议","tab.sarif":"SARIF","tab.changelog":"更新日志","tab.impact":"影响扫描","tab.mcp":"MCP 工具",
