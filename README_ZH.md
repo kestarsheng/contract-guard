@@ -28,7 +28,7 @@ curl -X POST https://contract-guard-eta.vercel.app/v1/diff \
 
 **MCP 端点：** `https://contract-guard-eta.vercel.app/mcp`
 
-添加到任何 MCP 兼容的 Agent（Claude、Cursor 等），Agent 即获得八个工具：`check_breaking_changes`、`list_supported_formats`、`explain_change_type`、`suggest_version_bump`、`generate_changelog`、`suggest_migration`、`scan_consumer_impact`、`run_benchmark`。
+添加到任何 MCP 兼容的 Agent（Claude、Cursor 等），Agent 即获得九个工具：`check_breaking_changes`、`list_supported_formats`、`explain_change_type`、`suggest_version_bump`、`generate_changelog`、`suggest_migration`、`scan_consumer_impact`、`check_gate`、`run_benchmark`。
 
 ---
 
@@ -186,6 +186,7 @@ GET /v1/benchmark
 | `generate_changelog(old_spec, new_spec, format, old_version, new_version)` | 生成 markdown changelog |
 | `suggest_migration(old_spec, new_spec, format)` | 为破坏性变更生成兼容性迁移建议 |
 | `scan_consumer_impact(old_spec, new_spec, format, consumer_profile)` | 消费者感知扫描——哪些变更影响特定调用方 + 传递爆炸半径 |
+| `check_gate(old_spec, new_spec, format, max_severity, allow_breaking, consumer_profile)` | CI 门禁——按策略判定契约变更通过/阻断 |
 | `run_benchmark()` | 回放 16 组回归语料库，报告 precision/recall/F1 |
 
 ### 额外端点
@@ -198,6 +199,7 @@ GET /v1/benchmark
 | `POST /v1/sarif` | 导出 SARIF 2.1.0 格式（GitHub Code Scanning） |
 | `POST /v1/changelog` | 生成 markdown changelog |
 | `POST /v1/consumer-scan` | 消费者感知影响扫描 + 传递影响分析 |
+| `POST /v1/gate` | CI 门禁——按策略（max_severity / consumer_profile）判定通过/阻断 |
 | `GET /v1/benchmark` | 内置回归语料库 — accuracy/precision/recall/F1 |
 
 ---

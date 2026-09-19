@@ -24,6 +24,7 @@ from fastmcp import FastMCP
 from .config import PROJECT_SLUG, get_settings
 from .benchmark import run_benchmark as _run_benchmark
 from .diff_core import DiffError, detect_changes, normalize_format
+from .gate import evaluate_gate as _evaluate_gate
 from .impact import scan_consumer_impact as _scan_consumer_impact
 from .migration import suggest_migration as _suggest_migration
 from .models import SUPPORTED_FORMATS
@@ -46,7 +47,9 @@ mcp = FastMCP(
         "Use suggest_migration to get concrete advice on restoring compatibility. "
         "Use scan_consumer_impact to check whether a change affects the specific "
         "paths/schemas/fields YOUR agent depends on (and to see the transitive "
-        "blast radius of component-schema changes). Use run_benchmark to verify "
+        "blast radius of component-schema changes). Use check_gate to make a "
+        "pass/block merge decision against a policy (max_severity or "
+        "consumer_profile). Use run_benchmark to verify "
         "the engines' precision/recall on the built-in regression corpus."
     ),
 )
@@ -333,6 +336,59 @@ def run_benchmark() -> str:
     """
     report = _run_benchmark()
     return json.dumps({"ok": True, **report}, ensure_ascii=False)
+
+
+@mcp.tool()
+def check_gate(
+    old_spec: str,
+    new_spec: str,
+    format: str = "openapi",
+    max_severity: str = "",
+    allow_breaking: bool = False,
+    consumer_profile: str = "{}",
+) -> str:
+    """Decide pass/block for a contract change in a CI gate.
+
+    Combines the deterministic diff with an optional consumer subset and
+    returns a single decision: is this change safe to merge? Default policy
+    blocks on any breaking change. Use max_severity to allow non-critical
+    breaking changes through (e.g. "major" blocks only critical), or pass a
+    consumer_profile to evaluate only findings that affect YOUR subset.
+
+    Args:
+        old_spec: the previous contract text.
+        new_spec: the new contract text.
+        format: "openapi" | "graphql" | "json-schema".
+        max_severity: threshold severity ("info"|"minor"|"major"|"critical");
+            only findings STRICTER than this block the gate. Empty string
+            means block on any breaking change.
+        allow_breaking: if true, never block (informational only).
+        consumer_profile: JSON string, e.g.
+            {"paths": ["/users"], "schemas": ["User"]}. Only findings that
+            hit this consumer are considered.
+
+    Returns:
+        JSON string: {ok, passed, blocked_by[], policy, breaking_count,
+        total_changes, summary, diff_summary}.
+    """
+    try:
+        profile = json.loads(consumer_profile or "{}")
+        if not isinstance(profile, dict):
+            return json.dumps({"ok": False, "error": "consumer_profile must be a JSON object"}, ensure_ascii=False)
+    except ValueError as exc:
+        return json.dumps({"ok": False, "error": f"Invalid consumer_profile JSON: {exc}"}, ensure_ascii=False)
+    try:
+        result = _evaluate_gate(
+            old_spec,
+            new_spec,
+            format,
+            allow_breaking=allow_breaking or None,
+            max_severity=max_severity or None,
+            consumer_profile=profile or None,
+        )
+    except DiffError as exc:
+        return json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=False)
+    return json.dumps({"ok": True, **result}, ensure_ascii=False)
 
 
 def main() -> None:

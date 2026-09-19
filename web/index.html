@@ -221,8 +221,8 @@ footer a:hover{color:var(--blue-deep);text-decoration:underline}
       <div class="hero-stats">
         <div class="stat"><b data-c="brand" data-i18n-dyn="stat.rules">35+</b><span data-i18n="stat.rulesL">detection rules</span></div>
         <div class="stat"><b data-c="minor" data-i18n-dyn="stat.formats">3</b><span data-i18n="stat.formatsL">contract formats</span></div>
-        <div class="stat"><b data-c="major" data-i18n-dyn="stat.tools">8</b><span data-i18n="stat.toolsL">MCP tools</span></div>
-        <div class="stat"><b data-c="brand" data-i18n-dyn="stat.endpoints">8</b><span data-i18n="stat.endpointsL">REST endpoints</span></div>
+        <div class="stat"><b data-c="major" data-i18n-dyn="stat.tools">9</b><span data-i18n="stat.toolsL">MCP tools</span></div>
+        <div class="stat"><b data-c="brand" data-i18n-dyn="stat.endpoints">9</b><span data-i18n="stat.endpointsL">REST endpoints</span></div>
         <div class="stat"><b data-c="minor" data-i18n-dyn="stat.f1">1.0</b><span data-i18n="stat.f1L">benchmark F1</span></div>
       </div>
       <div class="hero-actions">
@@ -442,7 +442,7 @@ footer a:hover{color:var(--blue-deep);text-decoration:underline}
   </div>
 
   <div id="panel-mcp" class="panel">
-    <div class="panel-head"><h2 data-i18n="mcp.title">MCP tools for AI agents</h2><p data-i18n="mcp.sub">Point any MCP-compatible agent at the /mcp endpoint and it gains six tools out of the box.</p></div>
+    <div class="panel-head"><h2 data-i18n="mcp.title">MCP tools for AI agents</h2><p data-i18n="mcp.sub">Point any MCP-compatible agent at the /mcp endpoint and it gains nine tools out of the box.</p></div>
     <div class="mcp-grid" id="mcp-grid"></div>
   </div>
 </section>
@@ -460,7 +460,7 @@ const I18N={
     "hero.p":"Contract Guard diffs two OpenAPI, GraphQL, or JSON Schema contracts and tells you what a human reviewer would: what breaks, how bad, which consumers are hit, what to bump, and how to migrate. Your CI can call it, your agents can call it, you can call it.",
     "hero.cta":"Open the diff bench","hero.cta2":"Explore the API",
     "hero.fig":"fig.01 — users API","hero.tag":"2 consumers affected",
-    "stat.rules":"35+","stat.rulesL":"detection rules","stat.formats":"3","stat.formatsL":"contract formats","stat.tools":"8","stat.toolsL":"MCP tools","stat.endpoints":"8","stat.endpointsL":"REST endpoints","stat.f1":"1.0","stat.f1L":"benchmark F1",
+    "stat.rules":"35+","stat.rulesL":"detection rules","stat.formats":"3","stat.formatsL":"contract formats","stat.tools":"9","stat.toolsL":"MCP tools","stat.endpoints":"9","stat.endpointsL":"REST endpoints","stat.f1":"1.0","stat.f1L":"benchmark F1",
     "badge.det":"Deterministic","badge.mcp":"MCP-ready","badge.rep":"100% reproducible",
     "tab.diff":"Breaking diff","tab.chain":"Chain diff","tab.semver":"SemVer","tab.migration":"Migration","tab.sarif":"SARIF","tab.changelog":"Changelog","tab.impact":"Impact scan","tab.mcp":"MCP tools",
     "diff.title":"Breaking change diff","diff.sub":"Compare two contract versions and get a structured, reproducible finding set.",
@@ -473,7 +473,7 @@ const I18N={
     "impact.profileL":"Consumer profile (JSON)","impact.profileHint":"what you use",
     "impact.affected":"affect you","impact.clean":"No changes affect your consumer subset","impact.hits":"hit","impact.misses":"ignorable","impact.ops":"Affected operations","impact.noHits":"No changes hit your consumer subset","impact.missesTitle":"Ignorable changes (not in your subset)",
     "bench.title":"Regression benchmark","bench.sub":"16 labelled samples replayed through the deterministic engines","bench.samples":"samples","bench.correct":"correct","bench.ok":"pass",
-    "mcp.title":"MCP tools for AI agents","mcp.sub":"Point any MCP-compatible agent at the /mcp endpoint and it gains eight tools out of the box.",
+    "mcp.title":"MCP tools for AI agents","mcp.sub":"Point any MCP-compatible agent at the /mcp endpoint and it gains nine tools out of the box.",
     "common.format":"Format",
     "label.old":"Previous contract","label.new":"New contract","label.v1":"Version 1","label.v2":"Version 2","label.v3":"Version 3",
     "btn.run":"Check breaking changes","btn.running":"Analyzing…","btn.example":"Load example",
@@ -508,7 +508,7 @@ const I18N={
     "hero.p":"Contract Guard 对比两份 OpenAPI、GraphQL 或 JSON Schema 契约，给出人类评审才会说的结论：什么坏了、有多严重、伤到了谁、版本该升几级、迁移怎么走。CI 能调它，Agent 能调它，你也能直接调它。",
     "hero.cta":"打开对比工作台","hero.cta2":"浏览 API",
     "hero.fig":"图 01 — users API","hero.tag":"影响 2 个消费者",
-    "stat.rules":"35+","stat.rulesL":"条检测规则","stat.formats":"3","stat.formatsL":"种契约格式","stat.tools":"8","stat.toolsL":"个 MCP 工具","stat.endpoints":"8","stat.endpointsL":"个 REST 端点","stat.f1":"1.0","stat.f1L":"基准 F1",
+    "stat.rules":"35+","stat.rulesL":"条检测规则","stat.formats":"3","stat.formatsL":"种契约格式","stat.tools":"9","stat.toolsL":"个 MCP 工具","stat.endpoints":"9","stat.endpointsL":"个 REST 端点","stat.f1":"1.0","stat.f1L":"基准 F1",
     "badge.det":"确定性","badge.mcp":"可 Agent 化","badge.rep":"100% 可复现",
     "tab.diff":"破坏性 diff","tab.chain":"链式 diff","tab.semver":"语义化版本","tab.migration":"迁移建议","tab.sarif":"SARIF","tab.changelog":"更新日志","tab.impact":"影响扫描","tab.mcp":"MCP 工具",
     "diff.title":"破坏性变更检测","diff.sub":"对比两份契约版本，返回结构化、可复现的检测结果。",
@@ -521,7 +521,7 @@ const I18N={
     "impact.profileL":"消费者画像（JSON）","impact.profileHint":"你使用的内容",
     "impact.affected":"影响你","impact.clean":"无变更命中你的消费者子集","impact.hits":"命中","impact.misses":"可忽略","impact.ops":"受影响操作","impact.noHits":"无变更命中你的消费者子集","impact.missesTitle":"可忽略的变更（不在你的子集内）",
     "bench.title":"回归基准","bench.sub":"16 组带标注样本回放确定性引擎","bench.samples":"组样本","bench.correct":"正确","bench.ok":"通过",
-    "mcp.title":"面向 AI Agent 的 MCP 工具","mcp.sub":"让任意 MCP 兼容 Agent 指向 /mcp 端点，即可开箱获得八个工具。",
+    "mcp.title":"面向 AI Agent 的 MCP 工具","mcp.sub":"让任意 MCP 兼容 Agent 指向 /mcp 端点，即可开箱获得九个工具。",
     "common.format":"格式",
     "label.old":"旧版契约","label.new":"新版契约","label.v1":"版本 1","label.v2":"版本 2","label.v3":"版本 3",
     "btn.run":"检测破坏性变更","btn.running":"分析中…","btn.example":"载入示例",

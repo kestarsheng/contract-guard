@@ -28,7 +28,7 @@ curl -X POST https://contract-guard-eta.vercel.app/v1/diff \
 
 **MCP endpoint:** `https://contract-guard-eta.vercel.app/mcp`
 
-Add it to any MCP-compatible agent (Claude, Cursor, …) and the agent gains eight tools: `check_breaking_changes`, `list_supported_formats`, `explain_change_type`, `suggest_version_bump`, `generate_changelog`, `suggest_migration`, `scan_consumer_impact`, `run_benchmark`.
+Add it to any MCP-compatible agent (Claude, Cursor, …) and the agent gains nine tools: `check_breaking_changes`, `list_supported_formats`, `explain_change_type`, `suggest_version_bump`, `generate_changelog`, `suggest_migration`, `scan_consumer_impact`, `check_gate`, `run_benchmark`.
 
 ---
 
@@ -189,6 +189,7 @@ Lists supported contract formats.
 | `generate_changelog(old_spec, new_spec, format, old_version, new_version)` | Generates markdown changelog for release notes |
 | `suggest_migration(old_spec, new_spec, format)` | Generates compatibility migration suggestions for breaking changes |
 | `scan_consumer_impact(old_spec, new_spec, format, consumer_profile)` | Consumer-aware scan — which changes affect a specific caller, plus transitive blast radius |
+| `check_gate(old_spec, new_spec, format, max_severity, allow_breaking, consumer_profile)` | CI gate — pass/block a contract change against a policy |
 | `run_benchmark()` | Replays the 16-sample regression corpus, reports precision/recall/F1 |
 
 ### Additional endpoints
@@ -201,6 +202,7 @@ Lists supported contract formats.
 | `POST /v1/sarif` | Export diff results as SARIF 2.1.0 for GitHub Code Scanning |
 | `POST /v1/changelog` | Generate markdown changelog |
 | `POST /v1/consumer-scan` | Consumer-aware impact scan + transitive propagation |
+| `POST /v1/gate` | CI gate — pass/block a change against a policy (max_severity / consumer_profile) |
 | `GET /v1/benchmark` | Built-in regression corpus — accuracy/precision/recall/F1 |
 
 ---

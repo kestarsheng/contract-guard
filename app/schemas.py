@@ -120,3 +120,33 @@ class ConsumerScanRequest(BaseModel):
         ),
     )
     use_llm: bool = Field(False, description="Append LLM impact assessment (advisory)")
+
+class GateRequest(BaseModel):
+    old_spec: str = Field(..., description="Previous contract (OpenAPI/GraphQL SDL/JSON Schema text)")
+    new_spec: str = Field(..., description="New contract text to compare against old_spec")
+    format: str = Field("openapi", description="openapi | graphql | json-schema")
+    max_severity: str | None = Field(
+        None,
+        description=(
+            "Block only findings stricter than this threshold "
+            "(critical > major > minor > info). Higher severity than the "
+            "threshold blocks the gate. Omit with allow_breaking=false to "
+            "block every breaking change."
+        ),
+    )
+    allow_breaking: bool | None = Field(
+        None,
+        description=(
+            "Explicit policy: true always passes (only informational), "
+            "false blocks on any breaking change. Default (omit both) "
+            "blocks on any breaking change."
+        ),
+    )
+    consumer_profile: dict | None = Field(
+        None,
+        description=(
+            "Optional consumer subset (paths/schemas/fields). When set, the "
+            "gate evaluates only findings that hit this caller -- a change is "
+            "blocked only if it breaks THIS consumer."
+        ),
+    )
