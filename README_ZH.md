@@ -278,7 +278,7 @@ uvicorn app.main:app --reload --port 8000
 pytest -v
 ```
 
-64 个测试，覆盖三个引擎、编排层、semver/migration/sarif、chain diff、消费者感知影响扫描、传递影响分析与回归基准。
+75 个测试，覆盖三个引擎、编排层、semver/migration/sarif、chain diff、消费者感知影响扫描、传递影响分析与回归基准、CI 门禁。
 
 ---
 

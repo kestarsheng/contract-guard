@@ -281,7 +281,7 @@ Open <http://localhost:8000> for the demo page, <http://localhost:8000/docs> for
 pytest -v
 ```
 
-64 tests covering all three engines, orchestration, semver, migration, SARIF, chain diff, consumer-aware impact scan, transitive propagation, and the regression benchmark.
+75 tests covering all three engines, orchestration, semver, migration, SARIF, chain diff, consumer-aware impact scan, transitive propagation, the regression benchmark, and the CI gate.
 
 ---
 
